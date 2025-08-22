@@ -1,0 +1,14 @@
+import { useNavigate } from "react-router-dom";
+import RegisterForm from "../components/RegisterForm";
+
+export default function RegisterPage() {
+  const navigate = useNavigate();
+
+  return (
+    <RegisterForm
+      onSuccess={() => navigate("/login")} // ✅ after popup → go to login
+      onSwitch={() => navigate("/login")} // ✅ when "Already have account?"
+      onClose={() => navigate("/")} // optional close button
+    />
+  );
+}

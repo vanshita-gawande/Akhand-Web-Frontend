@@ -267,7 +267,6 @@ export default function RegisterForm({ onSuccess, onSwitch, onClose }) {
               </ul>
             )}
           </div>
-
           {/* Confirm Password */}
           <div>
             <label className="block text-gray-700 font-medium mb-1">
@@ -318,7 +317,6 @@ export default function RegisterForm({ onSuccess, onSwitch, onClose }) {
           </button>
         </p>
       </div>
-
       {/* ✅ Success Popup */}
       {showPopup && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-[9999]">

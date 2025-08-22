@@ -1,54 +1,47 @@
-// import { useState, useCallback } from "react";
-// import Navbar from "./components/Navbar";
-// import Dashboard from "./pages/Dashboard";
-// import AuthModal from "./components/AuthModal";
-
-// export default function App() {
-//   const [authOpen, setAuthOpen] = useState(false);
-//   const [authMode, setAuthMode] = useState("login"); // 'login' | 'register'
-
-//   const openLogin = useCallback(() => {
-//     setAuthMode("login");
-//     setAuthOpen(true);
-//   }, []);
-//   const openRegister = useCallback(() => {
-//     setAuthMode("register");
-//     setAuthOpen(true);
-//   }, []);
-//   const closeAuth = useCallback(() => setAuthOpen(false), []);
-//   const switchMode = useCallback((mode) => setAuthMode(mode), []);
-
-//   return (
-//     <>
-//       <Navbar onLoginClick={openLogin} onRegisterClick={openRegister} />
-//       <Dashboard />
-//       <AuthModal
-//         open={authOpen}
-//         mode={authMode}
-//         onClose={closeAuth}
-//         onSwitchMode={switchMode}
-//       />
-//     </>
-//   );
-// }
 import { useState } from "react";
+import { Routes, Route, useNavigate } from "react-router-dom";
 import Navbar from "./components/Navbar";
-import Dashboard from "./pages/Dashboard";
 import LoginForm from "./components/LoginForm";
 import RegisterForm from "./components/RegisterForm";
 
-// Add these imports
+// Pages
+import Dashboard from "./pages/Dashboard";
+import UserDashboard from "./pages/UserDashboard";
 import AboutUs from "./pages/AboutUs";
 import Services from "./pages/Services";
 import Footer from "./pages/Footer";
 
-export default function App() {
-  const [authOpen, setAuthOpen] = useState(false);
-  const [authMode, setAuthMode] = useState("login"); // 'login' | 'register'
+// -----------------------
+// Public layout component
+// -----------------------
+function PublicLayout({ onLoginClick, onRegisterClick }) {
+  return (
+    <>
+      <Navbar onLoginClick={onLoginClick} onRegisterClick={onRegisterClick} />
+      <section id="home">
+        <Dashboard />
+      </section>
+      <section id="about">
+        <AboutUs />
+      </section>
+      <section id="services">
+        <Services />
+      </section>
+      <section id="footer">
+        <Footer />
+      </section>
+    </>
+  );
+}
 
-  // ----------------------
-  // Auth modal handlers
-  // ----------------------
+// -----------------------
+// AppContent
+// -----------------------
+export default function AppContent() {
+  const [authOpen, setAuthOpen] = useState(false);
+  const [authMode, setAuthMode] = useState("login");
+  const navigate = useNavigate();
+
   const openLogin = () => {
     setAuthMode("login");
     setAuthOpen(true);
@@ -60,43 +53,43 @@ export default function App() {
   };
 
   const closeAuth = () => setAuthOpen(false);
-
   const switchMode = (mode) => setAuthMode(mode);
 
   return (
     <div className="scroll-smooth">
-      {/* Navbar */}
-      <Navbar onLoginClick={openLogin} onRegisterClick={openRegister} />
+      <Routes>
+        {/* ✅ Public pages */}
+        <Route
+          path="/"
+          element={
+            <PublicLayout
+              onLoginClick={openLogin}
+              onRegisterClick={openRegister}
+            />
+          }
+        />
 
-      {/* Sections with IDs for scrolling */}
-      <section id="home">
-        <Dashboard />
-      </section>
+        {/* ✅ User dashboard (completely separate page) */}
+        <Route path="/userdashboard" element={<UserDashboard />} />
+      </Routes>
 
-      <section id="about">
-        <AboutUs />
-      </section>
-
-      <section id="services">
-        <Services />
-      </section>
-
-      <section id="footer">
-        <Footer />
-      </section>
-
-      {/* Auth Modal */}
+      {/* ✅ Auth Modal */}
       {authOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           {authMode === "login" ? (
             <LoginForm
-              onSuccess={closeAuth}
+              onSuccess={() => {
+                setAuthOpen(false);
+                navigate("/userdashboard"); // redirect to user dashboard
+              }}
               onSwitch={() => switchMode("register")}
               onClose={closeAuth}
             />
           ) : (
             <RegisterForm
-              onSuccess={closeAuth}
+              onSuccess={() => {
+                setAuthMode("login"); // after register → login
+              }}
               onSwitch={() => switchMode("login")}
               onClose={closeAuth}
             />
