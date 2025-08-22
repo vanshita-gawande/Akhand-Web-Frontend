@@ -194,12 +194,20 @@ export default function RegisterForm({ onSuccess, onSwitch, onClose }) {
               value={values.mobile}
               onChange={(phone, country) => {
                 const digits = phone.replace(/\D/g, "");
+                const countryCode = country?.countryCode || "in"; // new country
                 setDialCode(country?.dialCode || "");
-                handleChange("mobile", digits);
-                setValues((prev) => ({
-                  ...prev,
-                  country: country.countryCode,
-                }));
+
+                // update both country and mobile together
+                const updatedValues = {
+                  ...values,
+                  country: countryCode,
+                  mobile: digits,
+                };
+                setValues(updatedValues);
+
+                // validate mobile with updated country
+                const errorMsg = validateField("mobile", digits, updatedValues);
+                setErrors((prev) => ({ ...prev, mobile: errorMsg }));
               }}
               inputStyle={{
                 width: "100%",
@@ -212,6 +220,7 @@ export default function RegisterForm({ onSuccess, onSwitch, onClose }) {
               disableDropdown={false}
               countryCodeEditable={false}
             />
+
             {errors.mobile && (
               <p className="text-red-500 text-sm mt-1">{errors.mobile}</p>
             )}
@@ -322,7 +331,7 @@ export default function RegisterForm({ onSuccess, onSwitch, onClose }) {
         <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-[9999]">
           <div className="bg-white p-6 rounded-xl shadow-lg w-80 text-center">
             <h3 className="text-lg font-semibold text-green-600 mb-2">
-              Registration Successful 
+              Registration Successful
             </h3>
             <p className="text-gray-600 mb-4">
               Your account has been created successfully.
