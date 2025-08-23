@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { loginUser } from "../api"; // ✅ import your API helper
 
 export default function LoginForm({ onSuccess, onSwitch, onClose }) {
   const [loading, setLoading] = useState(false);
@@ -18,19 +19,34 @@ export default function LoginForm({ onSuccess, onSwitch, onClose }) {
   async function onSubmit(e) {
     e.preventDefault();
     if (!validate()) return;
+
     setLoading(true);
 
-    setTimeout(() => {
-      setLoading(false);
-      // ✅ Show popup first; don't call onSuccess yet
+    try {
+      // ✅ Call login API
+     const data = await loginUser({
+       email: values.email,
+       password: values.password,
+     });
+      // ✅ Show popup first
       setShowPopup(true);
-    }, 600);
+      // ✅ Optionally store token in localStorage
+      localStorage.setItem("token", data.token);
+    } catch (err) {
+      console.error(err.response?.data?.message || err.message);
+      // show backend error
+      setErrors((prev) => ({
+        ...prev,
+        form: err.response?.data?.message || "Login failed",
+      }));
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
     <>
       <div className="max-w-md w-full mx-auto mt-8 p-5 bg-white/90 backdrop-blur-md rounded-2xl shadow-md border border-gray-200 relative">
-        {/* Close button */}
         {onClose && (
           <button
             onClick={onClose}
@@ -89,6 +105,13 @@ export default function LoginForm({ onSuccess, onSwitch, onClose }) {
             )}
           </div>
 
+          {/* Form-level error */}
+          {errors.form && (
+            <p className="text-red-500 text-sm mt-1 text-center">
+              {errors.form}
+            </p>
+          )}
+
           {/* Submit Button */}
           <div className="flex justify-center">
             <button
@@ -125,8 +148,7 @@ export default function LoginForm({ onSuccess, onSwitch, onClose }) {
             <button
               onClick={() => {
                 setShowPopup(false);
-                // ✅ Call onSuccess AFTER popup is dismissed (prevents unmount-before-popup)
-                onSuccess?.();
+                onSuccess?.(); // ✅ call after popup dismissed
               }}
               className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition"
             >
