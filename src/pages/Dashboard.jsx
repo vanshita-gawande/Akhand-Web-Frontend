@@ -1,4 +1,3 @@
-import React from "react";
 import basketballImg from "../assets/basketball.avif";
 import footballImg from "../assets/football.avif";
 import stadium from "../assets/stadium.avif";

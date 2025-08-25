@@ -7,7 +7,7 @@ export default function Navbar({ onLoginClick, onRegisterClick }) {
         {/* Brand */}
         <div className="flex items-center space-x-2">
           <div className="text-2xl font-bold text-purple-700">
-            ✨ Akhand Solutions
+           Akhand Sports
           </div>
         </div>
 

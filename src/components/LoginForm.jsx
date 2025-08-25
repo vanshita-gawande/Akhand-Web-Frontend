@@ -16,6 +16,33 @@ export default function LoginForm({ onSuccess, onSwitch, onClose }) {
     return Object.keys(e).length === 0;
   }
 
+  // async function onSubmit(e) {
+  //   e.preventDefault();
+  //   if (!validate()) return;
+
+  //   setLoading(true);
+
+  //   try {
+  //     // ✅ Call login API
+  //    const data = await loginUser({
+  //      email: values.email,
+  //      password: values.password,
+  //    });
+  //     // ✅ Show popup first
+  //     setShowPopup(true);
+  //     // ✅ Optionally store token in localStorage
+  //     localStorage.setItem("token", data.token);
+  //   } catch (err) {
+  //     console.error(err.response?.data?.message || err.message);
+  //     // show backend error
+  //     setErrors((prev) => ({
+  //       ...prev,
+  //       form: err.response?.data?.message || "Login failed",
+  //     }));
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // }
   async function onSubmit(e) {
     e.preventDefault();
     if (!validate()) return;
@@ -23,18 +50,24 @@ export default function LoginForm({ onSuccess, onSwitch, onClose }) {
     setLoading(true);
 
     try {
-      // ✅ Call login API
-     const data = await loginUser({
-       email: values.email,
-       password: values.password,
-     });
-      // ✅ Show popup first
-      setShowPopup(true);
-      // ✅ Optionally store token in localStorage
+      const data = await loginUser({
+        email: values.email,
+        password: values.password,
+      });
+
+      // ✅ Save token
       localStorage.setItem("token", data.token);
+
+      // ✅ Redirect via onSuccess (from App.jsx)
+      onSuccess();
+        // data = { token, user }
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));      
+        // ✅ Keep your existing dashboard working without edits:
+      localStorage.setItem("username", data.user.firstName || "User"); 
+      localStorage.setItem("email", data.user.email || "");
+      onSuccess(); // navigate
     } catch (err) {
-      console.error(err.response?.data?.message || err.message);
-      // show backend error
       setErrors((prev) => ({
         ...prev,
         form: err.response?.data?.message || "Login failed",
@@ -43,6 +76,7 @@ export default function LoginForm({ onSuccess, onSwitch, onClose }) {
       setLoading(false);
     }
   }
+
 
   return (
     <>

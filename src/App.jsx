@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { Routes, Route, useNavigate } from "react-router-dom";
+import { Routes, Route, useNavigate , Navigate} from "react-router-dom";
 import Navbar from "./components/Navbar";
 import LoginForm from "./components/LoginForm";
 import RegisterForm from "./components/RegisterForm";
+
 
 // Pages
 import Dashboard from "./pages/Dashboard";
@@ -55,6 +56,9 @@ export default function AppContent() {
   const closeAuth = () => setAuthOpen(false);
   const switchMode = (mode) => setAuthMode(mode);
 
+  // ✅ Check if user is logged in
+  const isAuthenticated = !!localStorage.getItem("token");
+
   return (
     <div className="scroll-smooth">
       <Routes>
@@ -70,7 +74,16 @@ export default function AppContent() {
         />
 
         {/* ✅ User dashboard (completely separate page) */}
-        <Route path="/userdashboard" element={<UserDashboard />} />
+        <Route
+          path="/userdashboard"
+          element={
+            localStorage.getItem("token") ? (
+              <UserDashboard />
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
+        />
       </Routes>
 
       {/* ✅ Auth Modal */}

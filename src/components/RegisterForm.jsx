@@ -3,6 +3,8 @@ import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
 import { registerUser } from "../api";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
+import validator from "validator";
+
 
 // utils/phoneRules.js
 export const phoneRules = {
@@ -50,13 +52,6 @@ export default function RegisterForm({ onSuccess, onSwitch, onClose }) {
     return rules;
   };
 
-  const getNationalNumber = (value) => {
-    const digits = value.replace(/\D/g, "");
-    if (digits.startsWith(dialCode)) {
-      return digits.slice(dialCode.length);
-    }
-    return digits;
-  };
 
   const validateField = (field, value, allValues = values) => {
     let message = "";
@@ -75,12 +70,58 @@ export default function RegisterForm({ onSuccess, onSwitch, onClose }) {
       }
     }
 
-    if (field === "email") {
-      if (!value.includes("@")) message = "Email must include '@'";
-      else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value))
-        message = "Enter a valid domain (example.com)";
-    }
+if (field === "email") {
+  const trimmed = value.trim();
 
+  // 1️⃣ Check for proper email syntax
+  if (!validator.isEmail(trimmed)) {
+    message = "Enter a valid email address";
+  }
+  // 2️⃣ Check for any uppercase letters
+  else if (/[A-Z]/.test(trimmed)) {
+    message = "Email must be in lowercase only";
+  } else {
+    const [localPart, domain] = trimmed.split("@");
+    const lowerDomain = domain.toLowerCase();
+
+    const allowedDomains = [
+      "gmail.com",
+      "yahoo.com",
+      "outlook.com",
+      "hotmail.com",
+      "icloud.com",
+      "yourcompany.com",
+      "othercompany.com",
+    ];
+
+    // 3️⃣ Block emails not in allowed domains
+    if (!allowedDomains.includes(lowerDomain)) {
+      message =
+        "Only Gmail, Yahoo, Outlook, iCloud, or authorized company emails are allowed";
+    } else {
+      // ✅ Valid lowercase email
+      message = null;
+    }
+  }
+}
+    // if (field === "mobile") {
+    //   if (!value) {
+    //     message = "Mobile number is required";
+    //   } else {
+    //     try {
+    //       const phoneNumber = parsePhoneNumberFromString(
+    //         value,
+    //         allValues.country.toUpperCase()
+    //       );
+    //       if (!phoneNumber || !phoneNumber.isValid()) {
+    //         message = `Enter a valid mobile number for ${allValues.country.toUpperCase()}`;
+    //       }
+    //     } catch {
+    //       message = `Enter a valid mobile number for ${allValues.country.toUpperCase()}`;
+    //     }
+    //   }
+    // }
+    // new code 
     if (field === "mobile") {
       if (!value) {
         message = "Mobile number is required";
@@ -90,8 +131,17 @@ export default function RegisterForm({ onSuccess, onSwitch, onClose }) {
             value,
             allValues.country.toUpperCase()
           );
+
           if (!phoneNumber || !phoneNumber.isValid()) {
             message = `Enter a valid mobile number for ${allValues.country.toUpperCase()}`;
+          } else {
+            // ✅ Extra validation for India
+            if (allValues.country.toUpperCase() === "IN") {
+              const nationalNumber = phoneNumber.nationalNumber; // e.g. 9876543210
+              if (!/^[7-9]\d{9}$/.test(nationalNumber)) {
+                message = "Indian mobile numbers must start with 7, 8, or 9";
+              }
+            }
           }
         } catch {
           message = `Enter a valid mobile number for ${allValues.country.toUpperCase()}`;
@@ -154,12 +204,16 @@ export default function RegisterForm({ onSuccess, onSwitch, onClose }) {
 
       const res = await registerUser(payload);
 
-      if (res?.data?.token) {
-        localStorage.setItem("token", res.data.token);
-      }
-
-      setRegistrationSuccess(true);
-      setShowPopup(true);
+ // res is already response.data → { token, user }
+ if (res?.token) {
+   localStorage.setItem("token", res.token);
+   localStorage.setItem("user", JSON.stringify(res.user));
+   // ✅ keep compatibility with UserDashboard’s current reads
+   localStorage.setItem("username", res.user.firstName || "User");
+   localStorage.setItem("email", res.user.email || "");
+ }
+ setRegistrationSuccess(true);
+ setShowPopup(true);
     } catch (err) {
       alert(err.response?.data?.message || "Registration failed");
     } finally {
