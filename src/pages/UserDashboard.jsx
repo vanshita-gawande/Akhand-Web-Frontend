@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import logo from '../assets/logo.webp';
 import {
   FaUserCircle,
   FaHistory,
@@ -107,10 +108,7 @@ export default function UserDashboard() {
       <header className="bg-indigo-700 text-white shadow-md sticky top-0 z-50">
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center h-20">
           {/* Brand Title */}
-          <h1 className="text-2xl font-bold tracking-tight text-white">
-            Akhand Sports
-          </h1>
-
+          <img src={logo} alt="Akhand Logo" className="h-35 w-35" />
           {/* Middle Search Bar (optional) */}
           <div className="hidden md:flex items-center bg-indigo-600 rounded-lg px-2 py-1 w-72">
             <FaSearch className="text-white mr-2" />
@@ -322,15 +320,9 @@ export default function UserDashboard() {
                 <span>Log Out</span>
               </button>
             </nav>
-
-            {/* Footer */}
-            <div className="mt-auto pt-6 text-center text-xs text-gray-500">
-              <p>Akand Sports &copy; 2023. All rights reserved.</p>
-            </div>
           </div>
         </div>
       )}
-
       {/* Booking Modal */}
       {modalOpen && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">

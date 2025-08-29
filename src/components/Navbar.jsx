@@ -1,4 +1,4 @@
-import React from "react";
+import logo from '../assets/logo.webp';
 
 export default function Navbar({ onLoginClick, onRegisterClick }) {
   return (
@@ -7,7 +7,7 @@ export default function Navbar({ onLoginClick, onRegisterClick }) {
         {/* Brand */}
         <div className="flex items-center space-x-2">
           <div className="text-2xl font-bold text-purple-700">
-           Akhand Sports
+            <img src={logo} alt="Akhand Logo" className="h-35 w-35" />
           </div>
         </div>
 
