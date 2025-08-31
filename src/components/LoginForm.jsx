@@ -1,11 +1,14 @@
 import { useState } from "react";
-import { loginUser } from "../api"; // ✅ import your API helper
+import { useNavigate } from "react-router-dom";
+import { loginUser } from "../api";
 
 export default function LoginForm({ onSuccess, onSwitch, onClose }) {
   const [loading, setLoading] = useState(false);
   const [values, setValues] = useState({ email: "", password: "" });
   const [errors, setErrors] = useState({});
   const [showPopup, setShowPopup] = useState(false);
+  const [userRole, setUserRole] = useState(null);
+  const navigate = useNavigate();
 
   function validate() {
     const e = {};
@@ -16,33 +19,6 @@ export default function LoginForm({ onSuccess, onSwitch, onClose }) {
     return Object.keys(e).length === 0;
   }
 
-  // async function onSubmit(e) {
-  //   e.preventDefault();
-  //   if (!validate()) return;
-
-  //   setLoading(true);
-
-  //   try {
-  //     // ✅ Call login API
-  //    const data = await loginUser({
-  //      email: values.email,
-  //      password: values.password,
-  //    });
-  //     // ✅ Show popup first
-  //     setShowPopup(true);
-  //     // ✅ Optionally store token in localStorage
-  //     localStorage.setItem("token", data.token);
-  //   } catch (err) {
-  //     console.error(err.response?.data?.message || err.message);
-  //     // show backend error
-  //     setErrors((prev) => ({
-  //       ...prev,
-  //       form: err.response?.data?.message || "Login failed",
-  //     }));
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // }
   async function onSubmit(e) {
     e.preventDefault();
     if (!validate()) return;
@@ -55,18 +31,19 @@ export default function LoginForm({ onSuccess, onSwitch, onClose }) {
         password: values.password,
       });
 
-      // ✅ Save token
-      localStorage.setItem("token", data.token);
+      console.log("✅ Login response:", data); // <-- debug log
 
-      // ✅ Redirect via onSuccess (from App.jsx)
-      onSuccess();
-        // data = { token, user }
+      // Save token and user info
       localStorage.setItem("token", data.token);
-      localStorage.setItem("user", JSON.stringify(data.user));      
-        // ✅ Keep your existing dashboard working without edits:
-      localStorage.setItem("username", data.user.firstName || "User"); 
-      localStorage.setItem("email", data.user.email || "");
-      onSuccess(); // navigate
+      localStorage.setItem("user", JSON.stringify(data.user || {}));
+      localStorage.setItem("username", data.user?.firstName || "User");
+      localStorage.setItem("email", data.user?.email || "");
+
+      // ✅ Safely store role
+      setUserRole(data.user?.role || data.role || "user");
+
+      // ✅ Always trigger popup
+      setShowPopup(true);
     } catch (err) {
       setErrors((prev) => ({
         ...prev,
@@ -76,7 +53,6 @@ export default function LoginForm({ onSuccess, onSwitch, onClose }) {
       setLoading(false);
     }
   }
-
 
   return (
     <>
@@ -182,7 +158,13 @@ export default function LoginForm({ onSuccess, onSwitch, onClose }) {
             <button
               onClick={() => {
                 setShowPopup(false);
-                onSuccess?.(); // ✅ call after popup dismissed
+                onSuccess?.();
+                // ✅ Redirect after popup dismiss
+                if (userRole === "admin") {
+                  navigate("/admindashboard");
+                } else {
+                  navigate("/userdashboard");
+                }
               }}
               className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition"
             >
