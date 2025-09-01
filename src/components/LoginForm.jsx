@@ -1,11 +1,14 @@
 import { useState } from "react";
-import { loginUser } from "../api"; // ✅ import your API helper
+import { useNavigate } from "react-router-dom";
+import { loginUser } from "../api";
 
 export default function LoginForm({ onSuccess, onSwitch, onClose }) {
   const [loading, setLoading] = useState(false);
   const [values, setValues] = useState({ email: "", password: "" });
   const [errors, setErrors] = useState({});
   const [showPopup, setShowPopup] = useState(false);
+  const [userRole, setUserRole] = useState(null);
+  const navigate = useNavigate();
 
   function validate() {
     const e = {};
@@ -23,18 +26,25 @@ export default function LoginForm({ onSuccess, onSwitch, onClose }) {
     setLoading(true);
 
     try {
-      // ✅ Call login API
-     const data = await loginUser({
-       email: values.email,
-       password: values.password,
-     });
-      // ✅ Show popup first
-      setShowPopup(true);
-      // ✅ Optionally store token in localStorage
+      const data = await loginUser({
+        email: values.email,
+        password: values.password,
+      });
+
+      console.log("✅ Login response:", data); // <-- debug log
+
+      // Save token and user info
       localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user || {}));
+      localStorage.setItem("username", data.user?.firstName || "User");
+      localStorage.setItem("email", data.user?.email || "");
+
+      // ✅ Safely store role
+      setUserRole(data.user?.role || data.role || "user");
+
+      // ✅ Always trigger popup
+      setShowPopup(true);
     } catch (err) {
-      console.error(err.response?.data?.message || err.message);
-      // show backend error
       setErrors((prev) => ({
         ...prev,
         form: err.response?.data?.message || "Login failed",
@@ -148,7 +158,13 @@ export default function LoginForm({ onSuccess, onSwitch, onClose }) {
             <button
               onClick={() => {
                 setShowPopup(false);
-                onSuccess?.(); // ✅ call after popup dismissed
+                onSuccess?.();
+                // ✅ Redirect after popup dismiss
+                if (userRole === "admin") {
+                  navigate("/admindashboard");
+                } else {
+                  navigate("/userdashboard");
+                }
               }}
               className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition"
             >
