@@ -122,7 +122,7 @@ import RegisterForm from "./components/RegisterForm";
 // Pages
 import Dashboard from "./pages/Dashboard";
 import UserDashboard from "./pages/UserDashboard";
-import AdminDashboard from "./pages/AdminDashboard"; // ✅ NEW
+import AdminDashboard from "./pages/AdminDashboard"; 
 import AboutUs from "./pages/AboutUs";
 import Services from "./pages/Services";
 import Footer from "./pages/Footer";
@@ -144,7 +144,7 @@ function PublicLayout({ onLoginClick, onRegisterClick }) {
         <Services />
       </section>
       <section id="footer">
-        <Footer />
+      
       </section>
     </>
   );
@@ -216,6 +216,7 @@ export default function AppContent() {
           }
         />
       </Routes>
+      <Footer />
 
       {/* ✅ Auth Modal */}
       {authOpen && (

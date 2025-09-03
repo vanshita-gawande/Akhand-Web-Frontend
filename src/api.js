@@ -54,7 +54,7 @@ export const getVenues = async () => {
 
 // Add new venue
 export const addVenue = async (venueData) => {
-  const response = await API.post("/venues", venueData);
+  const response = await API.post("/venues/register", venueData);
   return response.data;
 };
 
