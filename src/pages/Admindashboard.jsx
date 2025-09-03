@@ -7,14 +7,24 @@ export default function AdminDashboard() {
   const navigate = useNavigate();
   const [venues, setVenues] = useState([]);
   const [showModal, setShowModal] = useState(false);
-  const [formData, setFormData] = useState({
+  const [showPopup, setShowPopup] = useState(false);
+  // ✅ Define initial form data (easy reset)
+  const initialFormData = {
     sport: "",
-    venueName: "",
+    name: "",
     location: "",
     capacity: "",
     date: "",
     time: "",
-  });
+  };
+
+  const [formData, setFormData] = useState(initialFormData);
+
+  // Format for human readable display (DD-MM-YYYY)
+  const formatDateForDisplay = (dateString) => {
+    if (!dateString) return "";
+    return new Date(dateString).toLocaleDateString("en-GB"); // e.g. 02/09/2025
+  };
 
   // ✅ Fetch venues on load
   useEffect(() => {
@@ -26,7 +36,14 @@ export default function AdminDashboard() {
     }
 
     getVenues()
-      .then((data) => setVenues(data))
+      .then((data) => {
+        // Format each venue's date for UI display
+        const formatted = data.map((venue) => ({
+          ...venue,
+          date: formatDateForDisplay(venue.date),
+        }));
+        setVenues(formatted);
+      })
       .catch((err) => {
         console.error("Error fetching venues:", err);
         if (err.response?.status === 401) {
@@ -52,32 +69,55 @@ export default function AdminDashboard() {
   // ✅ Add venue using api.js
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     try {
-      const newVenue = await addVenue(formData);
-      setVenues([...venues, newVenue]); // update UI
-      setShowModal(false); // close modal after success
+      const payload = {
+        ...formData,
+        date: new Date(formData.date).toISOString(), // ✅ send ISO to backend
+      };
+
+      const response = await addVenue(payload);
+      const newVenue = {
+        ...response.venue,
+        date: formatDateForDisplay(response.venue.date), // format for UI
+      };
+
+      setVenues([...venues, newVenue]);
+      setShowModal(false);
+      setShowPopup(true);
     } catch (error) {
       console.error("Error registering venue:", error);
       alert(error.response?.data?.message || "Failed to register venue.");
     }
   };
+  // ✅ Close popup and reset form
+  const handlePopupClose = () => {
+    setShowPopup(false);
+    setFormData(initialFormData); // reset form fields
+  };
+
+  // ✅ Also reset when modal is closed without submitting
+  const handleModalClose = () => {
+    setShowModal(false);
+    setFormData(initialFormData);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 p-6">
       {/* Header */}
-      <header className="flex justify-between items-center bg-white p-4 rounded-2xl shadow mb-6">
+      <header className="flex flex-col sm:flex-row justify-between items-center bg-white p-4 rounded-2xl shadow mb-6 gap-4">
         <h1 className="text-2xl font-bold text-gray-800">Admin Dashboard</h1>
-        <div className="flex gap-4">
+
+        {/* Buttons */}
+        <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
           <button
             onClick={() => setShowModal(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-xl hover:bg-blue-600"
+            className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-xl hover:bg-blue-600"
           >
             <FaPlus /> Venue Registration
           </button>
           <button
             onClick={handleLogout}
-            className="flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded-xl hover:bg-red-600"
+            className="flex items-center justify-center gap-2 px-4 py-2 bg-red-500 text-white rounded-xl hover:bg-red-600"
           >
             <FaSignOutAlt /> Logout
           </button>
@@ -124,7 +164,7 @@ export default function AdminDashboard() {
                 className="bg-white p-6 rounded-2xl shadow hover:shadow-lg transition"
               >
                 <h3 className="text-lg font-bold text-gray-800 mb-2">
-                  {venue.venueName}
+                  {venue.name}
                 </h3>
                 <p className="text-gray-600">
                   <strong>Sport:</strong> {venue.sport}
@@ -152,7 +192,7 @@ export default function AdminDashboard() {
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex justify-center items-center z-50">
           <div className="bg-white rounded-2xl shadow-lg p-6 w-full max-w-lg relative">
             <button
-              onClick={() => setShowModal(false)}
+              onClick={handleModalClose}
               className="absolute top-3 right-3 text-gray-500 hover:text-gray-700 text-xl"
             >
               ✕
@@ -172,8 +212,8 @@ export default function AdminDashboard() {
               />
               <input
                 type="text"
-                name="venueName"
-                value={formData.venueName}
+                name="name"
+                value={formData.name}
                 onChange={handleChange}
                 placeholder="Venue Name"
                 className="w-full p-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400"
@@ -220,6 +260,27 @@ export default function AdminDashboard() {
                 Register Venue
               </button>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Success Popup */}
+      {showPopup && (
+        <div
+          className="fixed inset-0 flex items-center justify-center 
+                  bg-black/30 backdrop-blur-sm z-50"
+        >
+          <div className="bg-white rounded-2xl shadow-xl p-6 w-96 text-center">
+            <h2 className="text-xl font-bold text-green-600 mb-4">
+              ✅ Success!
+            </h2>
+            <p className="text-gray-700">Venue registered successfully.</p>
+            <button
+              onClick={handlePopupClose}
+              className="mt-6 px-6 py-2 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition"
+            >
+              OK
+            </button>
           </div>
         </div>
       )}
