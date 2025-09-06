@@ -91,29 +91,24 @@ export default function Navbar({ onLoginClick, onRegisterClick }) {
 
       {/* Logout Confirmation Popup */}
       {showLogoutPopup && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm z-50">
-          <div className="bg-white p-6 rounded-2xl shadow-lg w-96 relative">
-            {/* Close button */}
-            <button
-              onClick={() => setShowLogoutPopup(false)}
-              className="absolute top-3 right-3 text-gray-500 hover:text-gray-700 text-xl"
-            ></button>
-
+        <div className="fixed inset-0 z-50 flex items-center justify-center blackdrop-blurr bg-opacity-40 backdrop-blur-sm">
+          <div className="bg-white p-6 rounded-2xl shadow-lg w-80 text-center">
             <h2 className="text-xl font-bold text-gray-800 mb-4 text-center">
               Are you sure you want to logout?
             </h2>
+
             <div className="flex justify-center gap-4">
-              <button
-                onClick={handleLogoutConfirm}
-                className="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
-              >
-                Yes, Logout
-              </button>
               <button
                 onClick={() => setShowLogoutPopup(false)}
                 className="px-6 py-2 border border-purple-700 text-purple-700 rounded-lg hover:bg-purple-50"
               >
                 Cancel
+              </button>
+              <button
+                onClick={handleLogoutConfirm} // logout + close
+                className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700"
+              >
+                Yes, Logout
               </button>
             </div>
           </div>

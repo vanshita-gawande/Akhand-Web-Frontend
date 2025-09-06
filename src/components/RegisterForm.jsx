@@ -104,24 +104,6 @@ if (field === "email") {
     }
   }
 }
-    // if (field === "mobile") {
-    //   if (!value) {
-    //     message = "Mobile number is required";
-    //   } else {
-    //     try {
-    //       const phoneNumber = parsePhoneNumberFromString(
-    //         value,
-    //         allValues.country.toUpperCase()
-    //       );
-    //       if (!phoneNumber || !phoneNumber.isValid()) {
-    //         message = `Enter a valid mobile number for ${allValues.country.toUpperCase()}`;
-    //       }
-    //     } catch {
-    //       message = `Enter a valid mobile number for ${allValues.country.toUpperCase()}`;
-    //     }
-    //   }
-    // }
-    // new code 
     if (field === "mobile") {
       if (!value) {
         message = "Mobile number is required";
