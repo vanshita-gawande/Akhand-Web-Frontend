@@ -56,7 +56,7 @@ export default function LoginForm({ onSuccess, onSwitch, onClose }) {
 
   return (
     <>
-      <div className="max-w-md w-full mx-auto mt-8 p-5 bg-white/90 backdrop-blur-md rounded-2xl shadow-md border border-gray-200 relative">
+      <div className="max-w-md w-full mx-auto mt-8 p-5 bg-white/90 backdrop-blur rounded-2xl shadow-md border border-gray-200 relative">
         {onClose && (
           <button
             onClick={onClose}

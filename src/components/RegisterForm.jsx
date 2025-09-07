@@ -104,24 +104,6 @@ if (field === "email") {
     }
   }
 }
-    // if (field === "mobile") {
-    //   if (!value) {
-    //     message = "Mobile number is required";
-    //   } else {
-    //     try {
-    //       const phoneNumber = parsePhoneNumberFromString(
-    //         value,
-    //         allValues.country.toUpperCase()
-    //       );
-    //       if (!phoneNumber || !phoneNumber.isValid()) {
-    //         message = `Enter a valid mobile number for ${allValues.country.toUpperCase()}`;
-    //       }
-    //     } catch {
-    //       message = `Enter a valid mobile number for ${allValues.country.toUpperCase()}`;
-    //     }
-    //   }
-    // }
-    // new code 
     if (field === "mobile") {
       if (!value) {
         message = "Mobile number is required";
@@ -230,7 +212,7 @@ if (field === "email") {
 
   return (
     <>
-      <div className="max-w-lg w-full mx-auto mt-8 p-6 bg-white/90 backdrop-blur-md rounded-2xl shadow-md border border-gray-200 relative">
+      <div className="max-w-lg w-full mx-auto mt-8 p-6 bg-white/90 backdrop-blur rounded-2xl shadow-md border border-gray-200 relative">
         {onClose && (
           <button
             onClick={onClose}
