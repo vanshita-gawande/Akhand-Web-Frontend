@@ -430,68 +430,6 @@ export default function AdminDashboard() {
         </div>
       )}
 
-      {/* booking history */}
-      <section className="mt-10">
-        <h2 className="text-xl font-semibold mb-4 text-gray-800">
-          Booking History
-        </h2>
-
-        {adminBookings.length === 0 ? (
-          <p className="text-gray-600 italic">No bookings yet.</p>
-        ) : (
-          <div className="space-y-6">
-            {adminBookings.map(({ user, bookings, count }) => (
-              <div
-                key={user._id}
-                className="bg-white shadow-md rounded-2xl p-4 border border-gray-200 hover:shadow-lg transition"
-              >
-                {/* User Info */}
-                <div className="flex items-center justify-between mb-3">
-                  <div>
-                    <h3 className="text-lg font-bold text-purple-700">
-                      {user.firstName} {user.lastName}
-                    </h3>
-                    <p className="text-sm text-gray-500">{user.email}</p>
-                  </div>
-                  <div className="text-right">
-                    <span className="text-sm text-gray-600 font-medium">
-                      Total Bookings:{" "}
-                    </span>
-                    <span className="text-purple-600 font-bold">{count}</span>
-                  </div>
-                </div>
-
-                {/* Bookings List */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                  {bookings.map((b) => (
-                    <div
-                      key={b._id}
-                      className="bg-purple-50 p-3 rounded-xl border border-purple-100 hover:bg-purple-100 transition"
-                    >
-                      <p className="font-semibold text-purple-700">{b.name}</p>
-                      <p className="text-gray-700 text-sm">
-                        <span className="font-medium">Sport:</span>{" "}
-                        {b.sport || "-"}
-                      </p>
-                      <p className="text-gray-700 text-sm">
-                        <span className="font-medium">Date:</span>{" "}
-                        {new Date(b.date).toLocaleDateString("en-GB")}
-                      </p>
-                      <p className="text-gray-700 text-sm">
-                        <span className="font-medium">Time:</span> {b.time}
-                      </p>
-                      <p className="text-gray-700 text-sm">
-                        <span className="font-medium">Players:</span>{" "}
-                        {b.players}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </section>
 
       {/* Delete Confirmation Popup */}
       {showDeletePopup && (
