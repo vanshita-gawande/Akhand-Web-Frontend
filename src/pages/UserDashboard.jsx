@@ -23,7 +23,7 @@ import {
   FaBaseballBall,
 } from "react-icons/fa";
 import { GiCricketBat, GiTennisRacket, GiHockey } from "react-icons/gi";
-import { getVenues, bookVenue } from "../api"; // centralized API
+import { getVenues, bookVenue, getUserBookings } from "../api"; // centralized API
 import {
   Trophy,
   MapPin,
@@ -52,6 +52,9 @@ export default function UserDashboard() {
   const [showLogoutPopup, setShowLogoutPopup] = useState(false);
   const [showBookingPopup, setShowBookingPopup] = useState(false);
   const [bookingStatus, setBookingStatus] = useState(null); // "success" | "error"
+  const [showBookingHistory, setShowBookingHistory] = useState(false); // booking history
+  const [bookings, setBookings] = useState([]);
+
 
   useEffect(() => {
     // load user info from localStorage (if stored)
@@ -141,6 +144,20 @@ export default function UserDashboard() {
       setShowBookingPopup(true);
     }
   };
+
+ const fetchUserBookings = async () => {
+  try {
+    console.log("Fetching bookings...");
+    const data = await getUserBookings();
+    console.log("API response:", data);
+    setBookings(data);
+    setShowBookingHistory(true);
+  } catch (err) {
+    console.error("Failed to load booking history:", err);
+  }
+ };
+
+
 
   // Small helper to pick an icon based on sport name and then it is displayed in the venue cards it get called  below venue grid
   const sportIcon = (sport) => {
@@ -406,10 +423,17 @@ export default function UserDashboard() {
                 <FaUserCircle className="mr-3 text-indigo-600" />
                 <span>Profile</span>
               </button>
-              <button className="flex items-center text-left p-3 hover:bg-indigo-50 rounded-lg transition-colors duration-300 text-gray-800">
+              <button
+                onClick={() => {
+                  console.log("Booking history button clicked ✅");
+                  fetchUserBookings();
+                }}
+                className="flex items-center text-left p-3 hover:bg-indigo-50 rounded-lg transition-colors duration-300 text-gray-800"
+              >
                 <FaHistory className="mr-3 text-indigo-600" />
                 <span>Booking History</span>
               </button>
+
               <button className="flex items-center text-left p-3 hover:bg-indigo-50 rounded-lg transition-colors duration-300 text-gray-800">
                 <FaCog className="mr-3 text-indigo-600" />
                 <span>Settings</span>
@@ -511,6 +535,63 @@ export default function UserDashboard() {
           </div>
         </div>
       )}
+      {/* booking history model */}
+      {showBookingHistory && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black/30 backdrop-blur-sm z-50">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl p-6 relative">
+            <button
+              onClick={() => setShowBookingHistory(false)}
+              className="absolute top-3 right-3 text-gray-500 hover:text-black"
+            >
+              <FaTimes className="text-xl" />
+            </button>
+
+            <h2 className="text-2xl font-bold text-indigo-700 mb-6 flex items-center">
+              <FaHistory className="mr-2" /> Your Booking History
+            </h2>
+
+            {bookings.length === 0 ? (
+              <p className="text-gray-500 text-center">No bookings found.</p>
+            ) : (
+              <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
+                {bookings.map((booking) => (
+                  <div
+                    key={booking._id}
+                    className="p-4 rounded-lg border shadow-sm hover:shadow-md transition bg-gray-50"
+                  >
+                    <h3 className="font-semibold text-lg text-purple-700">
+                      {booking.venueId?.name || "Venue"}
+                    </h3>
+                    <p className="text-sm text-gray-600">
+                      <strong>Sport:</strong> {booking.venueId?.sport}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      <strong>Date:</strong>{" "}
+                      {new Date(booking.date).toLocaleDateString("en-GB")}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      <strong>Time:</strong> {booking.time}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      <strong>Players:</strong> {booking.players}
+                    </p>
+                    <p
+                      className={`text-sm font-medium mt-2 ${
+                        booking.status === "confirmed"
+                          ? "text-green-600"
+                          : "text-yellow-600"
+                      }`}
+                    >
+                      Status: {booking.status}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {showLogoutPopup && (
         <div className="fixed inset-0 z-50 flex items-center justify-center blackdrop-blurr bg-opacity-40 backdrop-blur-sm">
           <div className="bg-white p-6 rounded-2xl shadow-lg w-80 text-center">
