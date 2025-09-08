@@ -58,6 +58,17 @@ export const addVenue = async (venueData) => {
   return response.data;
 };
 
+//  New for update and delete
+export const updateVenue = async (id, venue) => {
+  const { data } = await API.put(`/venues/${id}`, venue);
+  return data;
+};
+
+export const deleteVenue = async (id) => {
+  const { data } = await API.delete(`/venues/${id}`);
+  return data;
+};
+
 // ------------------ BOOKINGS ------------------
 
 // Book a venue by admin , Calls POST /bookings.Sends booking info: venueId, date, time, players, etc Backend saves booking & returns success.
