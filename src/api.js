@@ -46,6 +46,7 @@ export const loginUser = async ({ email, password }) => {
 
 // ------------------ VENUES ------------------
 
+// this is for admin
 // Get all venues ,Calls GET /venues and Returns an array of venues (from your database).
 export const getVenues = async () => {
   const response = await API.get("/venues");
@@ -70,11 +71,35 @@ export const deleteVenue = async (id) => {
 };
 
 // ------------------ BOOKINGS ------------------
+//for user to book venue
+// export const bookVenue = async (bookingData) => {
+//   const response = await API.post("/bookings", bookingData);
+//   return response.data;
+// };
 
-// Book a venue by admin , Calls POST /bookings.Sends booking info: venueId, date, time, players, etc Backend saves booking & returns success.
+//Book a venue by logged-in user
 export const bookVenue = async (bookingData) => {
-  const response = await API.post("/bookings", bookingData);
+  const token = localStorage.getItem("token"); // stored after login
+
+  const response = await API.post("/bookings", bookingData, {
+    headers: {
+      Authorization: `Bearer ${token}` // ✅ send token
+    }
+  });
+
   return response.data;
+};
+ 
+//  Get bookings of current user
+export const getUserBookings = async () => {
+  const res = await API.get("/bookings/my-bookings");
+  return res.data;
+};
+
+//  (Optional) Get all bookings (for Admin dashboard)
+export const getAllBookings = async () => {
+  const { data } = await API.get("/bookings");
+  return data;
 };
 
 export default API;
