@@ -97,9 +97,11 @@ export const getUserBookings = async () => {
 };
 
 //  (Optional) Get all bookings (for Admin dashboard)
-export const getAllBookings = async () => {
-  const { data } = await API.get("/bookings");
-  return data;
+// Get all bookings (admin)
+export const getAdminBookings = async () => {
+  const res = await API.get("/bookings/admin/all-bookings");
+  return res.data;
 };
+
 
 export default API;

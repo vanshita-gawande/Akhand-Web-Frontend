@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { FaUsers, FaClipboardList, FaSignOutAlt, FaPlus } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import { getVenues, addVenue, updateVenue, deleteVenue } from "../api";
+import { getVenues, addVenue, updateVenue, deleteVenue,getAdminBookings} from "../api";
 import {Pencil,Trash2,Trophy,MapPin,Users,CalendarDays,Clock,} from "lucide-react";
 import logo from "../assets/logo.webp";
 
@@ -16,7 +16,7 @@ export default function AdminDashboard() {
   const [showDeletePopup, setShowDeletePopup] = useState(false); // controls visibility
   const [venueToDelete, setVenueToDelete] = useState(null); // stores the venue selected for deletion
   const [showLogoutPopup, setShowLogoutPopup] = useState(false);
-
+  const [adminBookings, setAdminBookings] = useState([]);
 
   const initialFormData = {
     sport: "",
@@ -78,6 +78,15 @@ export default function AdminDashboard() {
         }
       });
   }, [navigate]);
+  // Fetch bookings for admin
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+
+    getAdminBookings()
+      .then((data) => setAdminBookings(data))
+      .catch((err) => console.error(err));
+  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -200,6 +209,14 @@ export default function AdminDashboard() {
             >
               <FaPlus /> Venue Registration
             </button>
+
+            <button
+              onClick={() => setShowBookingHistory(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 shadow"
+            >
+              <FaClipboardList /> Booking History
+            </button>
+
             <button
               onClick={() => setShowLogoutPopup(true)}
               className="flex items-center gap-2 px-4 py-2 border border-purple-700 text-purple-700 rounded-xl hover:bg-purple-50 transition"
@@ -412,6 +429,69 @@ export default function AdminDashboard() {
           </div>
         </div>
       )}
+
+      {/* booking history */}
+      <section className="mt-10">
+        <h2 className="text-xl font-semibold mb-4 text-gray-800">
+          Booking History
+        </h2>
+
+        {adminBookings.length === 0 ? (
+          <p className="text-gray-600 italic">No bookings yet.</p>
+        ) : (
+          <div className="space-y-6">
+            {adminBookings.map(({ user, bookings, count }) => (
+              <div
+                key={user._id}
+                className="bg-white shadow-md rounded-2xl p-4 border border-gray-200 hover:shadow-lg transition"
+              >
+                {/* User Info */}
+                <div className="flex items-center justify-between mb-3">
+                  <div>
+                    <h3 className="text-lg font-bold text-purple-700">
+                      {user.firstName} {user.lastName}
+                    </h3>
+                    <p className="text-sm text-gray-500">{user.email}</p>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-sm text-gray-600 font-medium">
+                      Total Bookings:{" "}
+                    </span>
+                    <span className="text-purple-600 font-bold">{count}</span>
+                  </div>
+                </div>
+
+                {/* Bookings List */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                  {bookings.map((b) => (
+                    <div
+                      key={b._id}
+                      className="bg-purple-50 p-3 rounded-xl border border-purple-100 hover:bg-purple-100 transition"
+                    >
+                      <p className="font-semibold text-purple-700">{b.name}</p>
+                      <p className="text-gray-700 text-sm">
+                        <span className="font-medium">Sport:</span>{" "}
+                        {b.sport || "-"}
+                      </p>
+                      <p className="text-gray-700 text-sm">
+                        <span className="font-medium">Date:</span>{" "}
+                        {new Date(b.date).toLocaleDateString("en-GB")}
+                      </p>
+                      <p className="text-gray-700 text-sm">
+                        <span className="font-medium">Time:</span> {b.time}
+                      </p>
+                      <p className="text-gray-700 text-sm">
+                        <span className="font-medium">Players:</span>{" "}
+                        {b.players}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
 
       {/* Delete Confirmation Popup */}
       {showDeletePopup && (

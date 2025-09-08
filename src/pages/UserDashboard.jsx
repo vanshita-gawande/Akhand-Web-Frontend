@@ -126,6 +126,7 @@ export default function UserDashboard() {
         date: bookingForm.date ? new Date(bookingForm.date) : null,
         time: bookingForm.time,
         players: Number(bookingForm.players),
+        venueId: selectedVenue._id,
       };
 
       console.log("Booking payload:", payload);
@@ -156,8 +157,6 @@ export default function UserDashboard() {
     console.error("Failed to load booking history:", err);
   }
  };
-
-
 
   // Small helper to pick an icon based on sport name and then it is displayed in the venue cards it get called  below venue grid
   const sportIcon = (sport) => {
