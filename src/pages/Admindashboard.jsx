@@ -1,3 +1,4 @@
+// src/pages/AdminDashboard.jsx {Parent-folder}
 import { useState, useEffect } from "react";
 import { FaUsers, FaClipboardList, FaSignOutAlt, FaPlus } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
@@ -17,6 +18,8 @@ export default function AdminDashboard() {
   const [venueToDelete, setVenueToDelete] = useState(null); // stores the venue selected for deletion
   const [showLogoutPopup, setShowLogoutPopup] = useState(false);
   const [adminBookings, setAdminBookings] = useState([]);
+  const [showBookingHistory, setShowBookingHistory] = useState(false);
+
 
   const initialFormData = {
     sport: "",
@@ -429,7 +432,44 @@ export default function AdminDashboard() {
           </div>
         </div>
       )}
+      {/* booking history */}
+      {showBookingHistory && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black/30 backdrop-blur-sm z-50 px-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl p-6 relative">
+            {/* Close Button */}
+            <button
+              onClick={() => setShowBookingHistory(false)}
+              className="absolute top-3 right-3 text-gray-500 hover:text-black"
+            >
+              ✕
+            </button>
+            <h2 className="text-xl font-bold mb-4">Booking History</h2>
 
+            {adminBookings.length === 0 ? (
+              <p className="text-gray-600 italic">No bookings yet.</p>
+            ) : (
+              <ul className="space-y-3">
+                {adminBookings.map((booking) => (
+                  <li
+                    key={booking._id}
+                    className="border p-3 rounded-xl shadow-sm flex justify-between items-center"
+                  >
+                    <div>
+                      <p className="font-semibold">{booking.name}</p>
+                      <p className="text-sm text-gray-600">
+                        {booking.date} at {booking.time}
+                      </p>
+                    </div>
+                    <span className="text-blue-600 font-medium">
+                      {booking.venue?.name || "Unknown Venue"}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Delete Confirmation Popup */}
       {showDeletePopup && (

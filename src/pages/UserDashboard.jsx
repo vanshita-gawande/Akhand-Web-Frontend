@@ -1,4 +1,4 @@
-// src/pages/UserDashboard.jsx
+// src/pages/UserDashboard.jsx {Parent-folder}
 import { useState, useEffect, useRef } from "react";
 import logo from "../assets/logo.webp";
 import {
@@ -23,27 +23,15 @@ import {
   FaBaseballBall,
 } from "react-icons/fa";
 import { GiCricketBat, GiTennisRacket, GiHockey } from "react-icons/gi";
-import { getVenues, bookVenue, getUserBookings } from "../api"; // centralized API
-import {
-  Trophy,
-  MapPin,
-  Users,
-  CalendarDays,
-  Clock,
-  Bookmark,
-} from "lucide-react";
+import { getVenues, bookVenue, getUserBookings, cancelBooking } from "../api"; // centralized API
+import {Trophy,MapPin,Users,CalendarDays,Clock,Bookmark,} from "lucide-react";
 
 export default function UserDashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [venues, setVenues] = useState([]);
   const [selectedVenue, setSelectedVenue] = useState(null);
-  const [bookingForm, setBookingForm] = useState({
-    date: "",
-    time: "",
-    players: 1,
-  });
-
+  const [bookingForm, setBookingForm] = useState({date: "",time: "",players: 1,});// initially 1 player then can increase
   const [username, setUsername] = useState("Guest");
   const [email, setEmail] = useState("user@example.com");
   const [profilePicture, setProfilePicture] = useState(null);
@@ -54,7 +42,8 @@ export default function UserDashboard() {
   const [bookingStatus, setBookingStatus] = useState(null); // "success" | "error"
   const [showBookingHistory, setShowBookingHistory] = useState(false); // booking history
   const [bookings, setBookings] = useState([]);
-
+  const [bookingToCancel, setBookingToCancel] = useState(null); // the booking user wants to cancel
+  const [showCancelPopup, setShowCancelPopup] = useState(false);
 
   useEffect(() => {
     // load user info from localStorage (if stored)
@@ -148,7 +137,7 @@ export default function UserDashboard() {
 
  const fetchUserBookings = async () => {
   try {
-    console.log("Fetching bookings...");
+    // console.log("Fetching bookings...");
     const data = await getUserBookings();
     console.log("API response:", data);
     setBookings(data);
@@ -156,6 +145,18 @@ export default function UserDashboard() {
   } catch (err) {
     console.error("Failed to load booking history:", err);
   }
+ };
+ const handleCancelBooking = async () => {
+   if (!bookingToCancel) return;
+   try {
+     await cancelBooking(bookingToCancel._id); // call API
+     setBookings(bookings.filter((b) => b._id !== bookingToCancel._id)); // remove from state
+     setShowCancelPopup(false);
+     setBookingToCancel(null);
+   } catch (err) {
+     console.error("Failed to cancel booking:", err);
+     alert("Failed to cancel booking. Please try again.");
+   }
  };
 
   // Small helper to pick an icon based on sport name and then it is displayed in the venue cards it get called  below venue grid
@@ -562,27 +563,46 @@ export default function UserDashboard() {
                       {booking.venueId?.name || "Venue"}
                     </h3>
                     <p className="text-sm text-gray-600">
-                      <strong>Sport:</strong> {booking.venueId?.sport}
+                      <strong>Sport:</strong> {booking.venueId?.sport || "N/A"}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      <strong>Location:</strong>{" "}
+                      {booking.venueId?.location || "N/A"}
                     </p>
                     <p className="text-sm text-gray-600">
                       <strong>Date:</strong>{" "}
                       {new Date(booking.date).toLocaleDateString("en-GB")}
                     </p>
                     <p className="text-sm text-gray-600">
-                      <strong>Time:</strong> {booking.time}
+                      <strong>Time:</strong> {booking.time || "Flexible"}
                     </p>
                     <p className="text-sm text-gray-600">
                       <strong>Players:</strong> {booking.players}
                     </p>
                     <p
                       className={`text-sm font-medium mt-2 ${
-                        booking.status === "confirmed"
+                        booking.status === "booked"
                           ? "text-green-600"
-                          : "text-yellow-600"
+                          : "text-red-600"
                       }`}
                     >
-                      Status: {booking.status}
+                      Status:{" "}
+                      {booking.status.charAt(0).toUpperCase() +
+                        booking.status.slice(1)}
                     </p>
+
+                    {/* Cancel Booking Button */}
+                    {booking.status === "booked" && (
+                      <button
+                        onClick={() => {
+                          setBookingToCancel(booking);
+                          setShowCancelPopup(true);
+                        }}
+                        className="mt-2 px-3 py-1 text-sm bg-red-500 text-white rounded hover:bg-red-600 transition"
+                      >
+                        Cancel Booking
+                      </button>
+                    )}
                   </div>
                 ))}
               </div>
@@ -590,7 +610,7 @@ export default function UserDashboard() {
           </div>
         </div>
       )}
-
+      {/* logout popups */}
       {showLogoutPopup && (
         <div className="fixed inset-0 z-50 flex items-center justify-center blackdrop-blurr bg-opacity-40 backdrop-blur-sm">
           <div className="bg-white p-6 rounded-2xl shadow-lg w-80 text-center">
@@ -641,6 +661,35 @@ export default function UserDashboard() {
             >
               OK
             </button>
+          </div>
+        </div>
+      )}
+      {/* Cancel Booking Confirmation Popup */}
+      {showCancelPopup && bookingToCancel && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
+          <div className="bg-white p-6 rounded-2xl shadow-lg w-80 text-center">
+            <h3 className="text-lg font-bold text-gray-800 mb-4">
+              Confirm Cancellation
+            </h3>
+            <p className="text-sm text-gray-600 mb-6">
+              Are you sure you want to cancel your booking for{" "}
+              <strong>{bookingToCancel.venueId?.name}</strong> on{" "}
+              {new Date(bookingToCancel.date).toLocaleDateString("en-GB")}?
+            </p>
+            <div className="flex justify-center gap-4">
+              <button
+                onClick={() => setShowCancelPopup(false)}
+                className="px-4 py-2 rounded-lg border text-gray-600 hover:bg-gray-100"
+              >
+                No
+              </button>
+              <button
+                onClick={handleCancelBooking}
+                className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700"
+              >
+                Yes, Cancel
+              </button>
+            </div>
           </div>
         </div>
       )}
