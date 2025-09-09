@@ -6,7 +6,7 @@ import RegisterForm from "./components/RegisterForm";
 
 // Pages
 import Dashboard from "./pages/Dashboard";
-import UserDashboard from "./pages/UserDashboard";
+import UserDashboard from "./pages/UserDashboard/UserDashboard";
 import AdminDashboard from "./pages/Admindashboard";
 import AboutUs from "./pages/AboutUs";
 import Services from "./pages/Services";
