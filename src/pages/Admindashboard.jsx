@@ -435,7 +435,7 @@ export default function AdminDashboard() {
       {/* booking history */}
       {showBookingHistory && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/30 backdrop-blur-sm z-50 px-4">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl p-6 relative">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-3xl p-6 relative max-h-[80vh] overflow-y-auto">
             {/* Close Button */}
             <button
               onClick={() => setShowBookingHistory(false)}
@@ -443,29 +443,82 @@ export default function AdminDashboard() {
             >
               ✕
             </button>
-            <h2 className="text-xl font-bold mb-4">Booking History</h2>
+
+            <h2 className="text-2xl font-bold mb-6 text-center">
+              Booking History
+            </h2>
 
             {adminBookings.length === 0 ? (
-              <p className="text-gray-600 italic">No bookings yet.</p>
+              <p className="text-gray-600 italic text-center">
+                No bookings yet.
+              </p>
             ) : (
-              <ul className="space-y-3">
-                {adminBookings.map((booking) => (
-                  <li
-                    key={booking._id}
-                    className="border p-3 rounded-xl shadow-sm flex justify-between items-center"
+              <>
+                {/* Group bookings by username */}
+                {Object.entries(
+                  adminBookings.reduce((acc, booking) => {
+                    const username = booking.user?.username || "Unknown User";
+                    if (!acc[username]) acc[username] = [];
+                    acc[username].push(booking);
+                    return acc;
+                  }, {})
+                ).map(([username, bookings]) => (
+                  <div
+                    key={username}
+                    className="mb-6 border rounded-xl shadow-sm overflow-hidden"
                   >
-                    <div>
-                      <p className="font-semibold">{booking.name}</p>
-                      <p className="text-sm text-gray-600">
-                        {booking.date} at {booking.time}
-                      </p>
+                    {/* Header */}
+                    <div className="bg-gray-100 px-4 py-2 flex justify-between items-center">
+                      <span className="font-semibold text-gray-800">
+                        {username}
+                      </span>
+                      <span className="text-gray-600 text-sm">
+                        {bookings.length} bookings
+                      </span>
                     </div>
-                    <span className="text-blue-600 font-medium">
-                      {booking.venue?.name || "Unknown Venue"}
-                    </span>
-                  </li>
+
+                    {/* Body */}
+                    <div className="max-h-64 overflow-y-auto">
+                      <table className="w-full text-sm text-left border-separate border-spacing-0">
+                        <thead>
+                          <tr>
+                            <th className="px-4 py-2">User</th>
+                            <th className="px-4 py-2">Venue</th>
+                            <th className="px-4 py-2">Date</th>
+                            <th className="px-4 py-2">Time</th>
+                            <th className="px-4 py-2">Players</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {bookings.map((booking) => (
+                            <tr key={booking._id} className="border-b">
+                              <td className="px-4 py-2">
+                                {booking.userId?.username || "Unknown User"}
+                              </td>
+                              <td className="px-4 py-2">
+                                {booking.venueId?.name || "Unknown Venue"}
+                              </td>
+                              <td className="px-4 py-2">
+                                {booking.date
+                                  ? new Date(booking.date).toLocaleDateString(
+                                      "en-GB"
+                                    )
+                                  : "Unknown"}
+                              </td>
+                              <td className="px-4 py-2">
+                                {booking.time || "Unknown"}
+                              </td>
+                              <td className="px-4 py-2">
+                                {booking.players || "-"}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
                 ))}
-              </ul>
+              </>
             )}
           </div>
         </div>
