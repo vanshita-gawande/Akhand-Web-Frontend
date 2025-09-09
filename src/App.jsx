@@ -1,7 +1,7 @@
 // src/App.jsx
 import { useState } from "react";
 import { Routes, Route, useNavigate, Navigate } from "react-router-dom";
-import Navbar from "./components/Navbar";
+import Navbar from "./pages/Dashboard/Navbar";
 import LoginForm from "./components/LoginForm";
 import RegisterForm from "./components/RegisterForm";
 

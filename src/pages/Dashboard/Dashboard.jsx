@@ -23,8 +23,8 @@ export default function Dashboard({ onLoginClick, onRegisterClick }) {
     }
 
     console.log("Proceed with booking… user is logged in ✅");
-    // ✅ user is logged in, redirect to UserDashboard
-    navigate("/userdashboard");
+      // ✅ user is logged in, redirect to UserDashboard
+  navigate("/userdashboard");
   };
 
   return (
