@@ -1,3 +1,5 @@
+// src/pages/Dashboard/Services.jsx
+import React from "react";
 import {
   FaCalendarAlt,
   FaChartLine,
@@ -5,7 +7,7 @@ import {
   FaMoneyBillWave,
 } from "react-icons/fa";
 
-const services = [
+const defaultServices = [
   {
     title: "Event Management",
     desc: "Plan and organize tournaments with ease.",
@@ -28,7 +30,11 @@ const services = [
   },
 ];
 
-export default function Services() {
+export default function Services({
+  sectionTitle = "Our Services",
+  sectionSubtitle = "Powerful tools designed to make sports management smarter and smoother.",
+  services = defaultServices,
+}) {
   return (
     <section className="relative py-20 px-6 overflow-hidden bg-gradient-to-b from-white via-indigo-50 to-white">
       {/* Background blur orbs */}
@@ -37,11 +43,13 @@ export default function Services() {
 
       <div className="max-w-[1100px] mx-auto">
         <h2 className="text-3xl md:text-4xl font-bold text-gray-800 text-center">
-          Our <span className="text-indigo-600">Services</span>
+          {sectionTitle.split(" ")[0]}{" "}
+          <span className="text-indigo-600">
+            {sectionTitle.split(" ").slice(1).join(" ")}
+          </span>
         </h2>
         <p className="text-gray-600 mt-4 max-w-2xl mx-auto text-center">
-          Powerful tools designed to make sports management smarter and
-          smoother.
+          {sectionSubtitle}
         </p>
 
         {/* Service Cards */}
