@@ -8,7 +8,11 @@ import RegisterForm from "./components/RegisterForm";
 // Pages
 import Dashboard from "./pages/Dashboard/Dashboard";
 import UserDashboard from "./pages/UserDashboard/UserDashboard";
-import AdminDashboard from "./pages/Admindashboard";
+import AdminDashboard from "./pages/AdminDashboard/Admindashboard";
+
+// // Common Footer
+import Footer from "./CommonFiles/Footer";
+
 
 // -----------------------
 // Public layout component
@@ -59,7 +63,7 @@ export default function AppContent() {
   return (
     <div className="scroll-smooth">
       <Routes>
-        {/* ✅ Public pages */}
+        {/* ✅ Public Dashboard */}
         <Route
           path="/"
           element={
@@ -94,6 +98,8 @@ export default function AppContent() {
           }
         />
       </Routes>
+      {/* Footer always visible */}
+      <Footer />
 
       {/* ✅ Auth Modal */}
       {authOpen && (

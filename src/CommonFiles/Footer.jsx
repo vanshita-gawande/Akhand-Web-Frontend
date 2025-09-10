@@ -76,7 +76,6 @@
 //   );
 // }
 // src/pages/Dashboard/Footer.jsx
-
 import {
   FaFacebookF,
   FaTwitter,
@@ -97,19 +96,24 @@ export default function Footer({
   ],
 }) {
   return (
-    <footer className="relative bg-gray-900 text-gray-200 py-8 mt-0 overflow-hidden">
+    <footer className="w-full bg-gray-900 text-gray-200 py-8 mt-0 overflow-hidden">
       {/* Subtle background blur circles */}
       <div className="absolute top-0 left-0 w-36 h-36 bg-white/5 rounded-full blur-3xl" />
       <div className="absolute bottom-0 right-0 w-52 h-52 bg-white/5 rounded-full blur-3xl" />
 
-      <div className="max-w-[1100px] mx-auto px-6 flex flex-col md:flex-row justify-between gap-8">
+      {/* Inner container to keep content centered */}
+      <div className="max-w-[1100px] mx-auto px-6 flex flex-col md:flex-row justify-between gap-8 relative z-10">
         {/* About */}
         <div className="flex-1 space-y-3">
           <h3 className="text-lg font-bold text-gray-100">{companyName}</h3>
           <p className="text-gray-300 text-sm leading-relaxed">{description}</p>
           <div className="flex gap-4 mt-1">
             {socialLinks.map((social, i) => (
-              <a key={i} href={social.url} className="hover:text-gray-100 transition">
+              <a
+                key={i}
+                href={social.url}
+                className="hover:text-gray-100 transition"
+              >
                 {social.icon}
               </a>
             ))}
@@ -137,7 +141,8 @@ export default function Footer({
         </div>
       </div>
 
-      <div className="mt-6 text-center text-gray-400 text-sm">
+      {/* Bottom copyright */}
+      <div className="mt-6 text-center text-gray-400 text-sm relative z-10">
         &copy; {new Date().getFullYear()} {companyName}. All rights reserved.
       </div>
     </footer>
