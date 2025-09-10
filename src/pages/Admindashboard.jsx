@@ -1,7 +1,8 @@
+// src/pages/AdminDashboard.jsx {Parent-folder}
 import { useState, useEffect } from "react";
 import { FaUsers, FaClipboardList, FaSignOutAlt, FaPlus } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import { getVenues, addVenue, updateVenue, deleteVenue } from "../api";
+import { getVenues, addVenue, updateVenue, deleteVenue,getAdminBookings} from "../api";
 import {Pencil,Trash2,Trophy,MapPin,Users,CalendarDays,Clock,} from "lucide-react";
 import logo from "../assets/logo.webp";
 
@@ -16,6 +17,8 @@ export default function AdminDashboard() {
   const [showDeletePopup, setShowDeletePopup] = useState(false); // controls visibility
   const [venueToDelete, setVenueToDelete] = useState(null); // stores the venue selected for deletion
   const [showLogoutPopup, setShowLogoutPopup] = useState(false);
+  const [adminBookings, setAdminBookings] = useState([]);
+  const [showBookingHistory, setShowBookingHistory] = useState(false);
 
 
   const initialFormData = {
@@ -78,6 +81,15 @@ export default function AdminDashboard() {
         }
       });
   }, [navigate]);
+  // Fetch bookings for admin
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+
+    getAdminBookings()
+      .then((data) => setAdminBookings(data))
+      .catch((err) => console.error(err));
+  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -200,6 +212,14 @@ export default function AdminDashboard() {
             >
               <FaPlus /> Venue Registration
             </button>
+
+            <button
+              onClick={() => setShowBookingHistory(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 shadow"
+            >
+              <FaClipboardList /> Booking History
+            </button>
+
             <button
               onClick={() => setShowLogoutPopup(true)}
               className="flex items-center gap-2 px-4 py-2 border border-purple-700 text-purple-700 rounded-xl hover:bg-purple-50 transition"
@@ -409,6 +429,97 @@ export default function AdminDashboard() {
                 {editingVenue ? "Update Venue" : "Register Venue"}
               </button>
             </form>
+          </div>
+        </div>
+      )}
+      {/* booking history */}
+      {showBookingHistory && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black/30 backdrop-blur-sm z-50 px-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-3xl p-6 relative max-h-[80vh] overflow-y-auto">
+            {/* Close Button */}
+            <button
+              onClick={() => setShowBookingHistory(false)}
+              className="absolute top-3 right-3 text-gray-500 hover:text-black"
+            >
+              ✕
+            </button>
+
+            <h2 className="text-2xl font-bold mb-6 text-center">
+              Booking History
+            </h2>
+
+            {adminBookings.length === 0 ? (
+              <p className="text-gray-600 italic text-center">
+                No bookings yet.
+              </p>
+            ) : (
+              <>
+                {/* Group bookings by username */}
+                {Object.entries(
+                  adminBookings.reduce((acc, booking) => {
+                    const username = booking.user?.username || "Unknown User";
+                    if (!acc[username]) acc[username] = [];
+                    acc[username].push(booking);
+                    return acc;
+                  }, {})
+                ).map(([username, bookings]) => (
+                  <div
+                    key={username}
+                    className="mb-6 border rounded-xl shadow-sm overflow-hidden"
+                  >
+                    {/* Header */}
+                    <div className="bg-gray-100 px-4 py-2 flex justify-between items-center">
+                      <span className="font-semibold text-gray-800">
+                        {username}
+                      </span>
+                      <span className="text-gray-600 text-sm">
+                        {bookings.length} bookings
+                      </span>
+                    </div>
+
+                    {/* Body */}
+                    <div className="max-h-64 overflow-y-auto">
+                      <table className="w-full text-sm text-left border-separate border-spacing-0">
+                        <thead>
+                          <tr>
+                            <th className="px-4 py-2">User</th>
+                            <th className="px-4 py-2">Venue</th>
+                            <th className="px-4 py-2">Date</th>
+                            <th className="px-4 py-2">Time</th>
+                            <th className="px-4 py-2">Players</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {bookings.map((booking) => (
+                            <tr key={booking._id} className="border-b">
+                              <td className="px-4 py-2">
+                                {booking.userId?.username || "Unknown User"}
+                              </td>
+                              <td className="px-4 py-2">
+                                {booking.venueId?.name || "Unknown Venue"}
+                              </td>
+                              <td className="px-4 py-2">
+                                {booking.date
+                                  ? new Date(booking.date).toLocaleDateString(
+                                      "en-GB"
+                                    )
+                                  : "Unknown"}
+                              </td>
+                              <td className="px-4 py-2">
+                                {booking.time || "Unknown"}
+                              </td>
+                              <td className="px-4 py-2">
+                                {booking.players || "-"}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                ))}
+              </>
+            )}
           </div>
         </div>
       )}

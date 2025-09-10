@@ -1,16 +1,14 @@
+// src/App.jsx
 import { useState } from "react";
 import { Routes, Route, useNavigate, Navigate } from "react-router-dom";
-import Navbar from "./components/Navbar";
+import Navbar from "./pages/Dashboard/Navbar";
 import LoginForm from "./components/LoginForm";
 import RegisterForm from "./components/RegisterForm";
 
 // Pages
-import Dashboard from "./pages/Dashboard";
-import UserDashboard from "./pages/UserDashboard";
+import Dashboard from "./pages/Dashboard/Dashboard";
+import UserDashboard from "./pages/UserDashboard/UserDashboard";
 import AdminDashboard from "./pages/Admindashboard";
-import AboutUs from "./pages/AboutUs";
-import Services from "./pages/Services";
-import Footer from "./pages/Footer";
 
 // -----------------------
 // Public layout component
@@ -20,15 +18,12 @@ function PublicLayout({ onLoginClick, onRegisterClick }) {
     <>
       <Navbar onLoginClick={onLoginClick} onRegisterClick={onRegisterClick} />
       <section id="home">
-        <Dashboard />
+        {/* Pass props to Dashboard so it can open login/register popup */}
+        <Dashboard
+          onLoginClick={onLoginClick}
+          onRegisterClick={onRegisterClick}
+        />
       </section>
-      <section id="about">
-        <AboutUs />
-      </section>
-      <section id="services">
-        <Services />
-      </section>
-      <section id="footer"></section>
     </>
   );
 }
@@ -99,7 +94,6 @@ export default function AppContent() {
           }
         />
       </Routes>
-      <Footer />
 
       {/* ✅ Auth Modal */}
       {authOpen && (

@@ -38,6 +38,7 @@ export default function LoginForm({ onSuccess, onSwitch, onClose }) {
       localStorage.setItem("user", JSON.stringify(data.user || {}));
       localStorage.setItem("username", data.user?.firstName || "User");
       localStorage.setItem("email", data.user?.email || "");
+      localStorage.setItem("loginTime", Date.now().toString());
 
       // ✅ Safely store role
       setUserRole(data.user?.role || data.role || "user");

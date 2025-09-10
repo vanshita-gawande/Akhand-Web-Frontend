@@ -1,16 +1,42 @@
 // src/components/Navbar.jsx
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import logo from "../assets/logo.webp";
+import logo from "../../assets/logo.webp"; 
+import { useNavigate } from "react-router-dom";
 
 export default function Navbar({ onLoginClick, onRegisterClick }) {
   const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem("token"));
   const [showLogoutPopup, setShowLogoutPopup] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
 
-  // Re-check auth whenever the route changes
+  // for logout automatically
+  // ⏰ check expiry function
+  const checkAuth = () => {
+    const token = localStorage.getItem("token");
+    const loginTime = localStorage.getItem("loginTime");
+
+    if (!token || !loginTime) {
+      return false;
+    }
+
+    const oneHour = 1 * 60 * 1000; // 1 hr in ms
+    const now = Date.now();
+
+    if (now - parseInt(loginTime, 10) > oneHour) {
+      // expired → clear storage
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      localStorage.removeItem("loginTime");
+      return false;
+    }
+
+    return true;
+  };
+
+  // Run on mount + route change
   useEffect(() => {
-    setIsLoggedIn(!!localStorage.getItem("token"));
+    setIsLoggedIn(checkAuth());
   }, [location.pathname]);
 
   // React to storage changes
@@ -20,11 +46,21 @@ export default function Navbar({ onLoginClick, onRegisterClick }) {
     return () => window.removeEventListener("storage", syncAuth);
   }, []);
 
+  // Run every 10s → auto logout without refresh
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIsLoggedIn(checkAuth());
+    }, 10000); // check every 10s
+    return () => clearInterval(interval);
+  }, []);
+
   const handleLogoutConfirm = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     setIsLoggedIn(false);
     setShowLogoutPopup(false);
+    localStorage.removeItem("loginTime");
+    navigate("/"); // redirect home
     // Optional redirect
     // window.location.href = "/";
   };
@@ -117,3 +153,4 @@ export default function Navbar({ onLoginClick, onRegisterClick }) {
     </>
   );
 }
+

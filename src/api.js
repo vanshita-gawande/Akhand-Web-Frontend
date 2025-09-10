@@ -71,12 +71,6 @@ export const deleteVenue = async (id) => {
 };
 
 // ------------------ BOOKINGS ------------------
-//for user to book venue
-// export const bookVenue = async (bookingData) => {
-//   const response = await API.post("/bookings", bookingData);
-//   return response.data;
-// };
-
 //Book a venue by logged-in user
 export const bookVenue = async (bookingData) => {
   const token = localStorage.getItem("token"); // stored after login
@@ -95,11 +89,22 @@ export const getUserBookings = async () => {
   const res = await API.get("/bookings/my-bookings");
   return res.data;
 };
-
-//  (Optional) Get all bookings (for Admin dashboard)
-export const getAllBookings = async () => {
-  const { data } = await API.get("/bookings");
-  return data;
+// Cancel a booking by its ID
+export const cancelBooking = async (bookingId) => {
+  const token = localStorage.getItem("token");
+  const response = await API.delete(`/bookings/${bookingId}`, {
+    headers: {
+      Authorization: `Bearer ${token}`, // send token
+    },
+  });
+  return response.data; // backend should return a success message or the deleted booking
 };
+
+// Get all bookings (admin)
+export const getAdminBookings = async () => {
+  const res = await API.get("/bookings/all-bookings"); // ✅ correct path
+  return res.data;
+};
+
 
 export default API;
