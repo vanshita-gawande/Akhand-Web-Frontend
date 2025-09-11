@@ -2,9 +2,18 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getVenues } from "../../api";
-import VenuesGrid from "../UserDashboard/VenuesGrid"; // Relative path to VenuesGrid.jsx
+import VenuesGrid from "./VenuesGrid"; // Relative path to VenuesGrid.jsx
 import { Trophy} from "lucide-react";
 import RegisterPromptModal from "./popups/RegisterPromptPopup";
+
+//
+import basketballImg from "../../assets/basketball.avif";
+import footballImg from "../../assets/football.avif";
+import cricketImg from "../../assets/football.avif";
+import tennisImg from "../../assets/stadium.avif";
+import badmintonImg from "../../assets/football.avif";
+import volleyballImg from "../../assets/swimming.avif";
+
 
 export default function VenuesSection({ limitCards = false, onLoginClick, onRegisterClick }) {
   const [venues, setVenues] = useState([]);
@@ -12,6 +21,14 @@ export default function VenuesSection({ limitCards = false, onLoginClick, onRegi
   const [error, setError] = useState(null);
   const navigate = useNavigate();
   const [showPrompt, setShowPrompt] = useState(false);
+  const venueImages = [
+    basketballImg,
+    footballImg,
+    cricketImg,
+    tennisImg,
+    badmintonImg,
+    volleyballImg,
+  ];
 
   useEffect(() => {
     const fetchVenues = async () => {
@@ -34,12 +51,17 @@ export default function VenuesSection({ limitCards = false, onLoginClick, onRegi
       setShowPrompt(true); // show modal instead of redirect
       return;
     }
-    navigate("/userdashboard", { state: { venue } });// when click on booknow or bookcourt
+    navigate("/userdashboard", { state: { venue } }); // when click on booknow or bookcourt
   };
 
-  // Limit to first 5 cards if on Dashboard
-  const displayedVenues = limitCards ? venues.slice(0, 5) : venues;
-
+  // Limit to first 6 cards if on Dashboard
+  // When slicing/displaying venues:
+  const displayedVenues = (limitCards ? venues.slice(0, 6) : venues).map(
+    (venue, index) => ({
+      ...venue,
+      image: venue.image || venueImages[index % venueImages.length],
+    })
+  );
   return (
     <section className="mt-12 space-y-8">
       {/* Big CTA Button */}

@@ -10,6 +10,7 @@ import {
 } from "react-icons/fa";
 
 export default function Sidebar({
+  sidebarOpen,
   setSidebarOpen,
   profilePicture,
   username,
@@ -21,14 +22,30 @@ export default function Sidebar({
   setShowLogoutPopup,
 }) {
   return (
-    <div className="fixed inset-0 flex justify-end z-50">
-      <div className="relative bg-white w-80 h-full shadow-lg p-6 flex flex-col">
+    <>
+      {/* Overlay */}
+      <div
+        className={`fixed inset-0 z-40 bg-black/30 transition-opacity duration-300 ${
+          sidebarOpen
+            ? "opacity-100 pointer-events-auto"
+            : "opacity-0 pointer-events-none"
+        }`}
+        onClick={() => setSidebarOpen(false)}
+      ></div>
+
+      {/* Sidebar */}
+      <div
+        className={`fixed top-0 right-0 h-full w-80 bg-white shadow-lg z-50 transform transition-transform duration-300 ${
+          sidebarOpen ? "translate-x-0" : "translate-x-full"
+        } flex flex-col overflow-y-auto`}
+      >
         <button
           className="absolute top-4 right-4 text-gray-500 hover:text-black"
           onClick={() => setSidebarOpen(false)}
         >
           <FaTimes className="text-xl" />
         </button>
+
         <div className="flex flex-col items-center mb-6 mt-4 pr-3">
           <div className="relative mb-4">
             <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-indigo-500">
@@ -122,7 +139,7 @@ export default function Sidebar({
             <span>Settings</span>
           </button>
           <button
-            onClick={() => setShowLogoutPopup(true)} // 👈 instead of directly logging out
+            onClick={() => setShowLogoutPopup(true)}
             className="flex items-center text-left p-3 hover:bg-red-50 rounded-lg transition-colors duration-300 text-red-600 mt-4"
           >
             <FaSignOutAlt className="mr-3" />
@@ -130,6 +147,6 @@ export default function Sidebar({
           </button>
         </nav>
       </div>
-    </div>
+    </>
   );
 }

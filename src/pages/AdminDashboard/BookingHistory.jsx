@@ -4,20 +4,19 @@ export default function BookingHistory({ bookings, onClose }) {
   const [expandedUsers, setExpandedUsers] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
 
-  const toggleExpand = (username) => {
+  const toggleExpand = (userId) => {
     setExpandedUsers((prev) => ({
       ...prev,
-      [username]: !prev[username],
+      [userId]: !prev[userId],
     }));
   };
 
   // Group bookings by user
   const groupedBookings = Object.entries(
     bookings.reduce((acc, booking) => {
-      const username =
-        booking.userId?.username || booking.userId?.email || "Unknown User";
-      if (!acc[username]) acc[username] = [];
-      acc[username].push(booking);
+      const userId = booking.userId?._id || "unknown";
+      if (!acc[userId]) acc[userId] = { user: booking.userId, bookings: [] };
+      acc[userId].bookings.push(booking);
       return acc;
     }, {})
   );
@@ -55,24 +54,24 @@ export default function BookingHistory({ bookings, onClose }) {
         ) : (
           <>
             {/* User Cards */}
-            {visibleUsers.map(([username, userBookings]) => {
-              const isExpanded = expandedUsers[username];
+            {visibleUsers.map(([userId, data]) => {
+              const isExpanded = expandedUsers[userId];
               const visibleBookings = isExpanded
-                ? userBookings
-                : userBookings.slice(0, 2);
+                ? data.bookings
+                : data.bookings.slice(0, 2);
 
               return (
                 <div
-                  key={username}
+                  key={userId}
                   className="mb-6 border rounded-xl shadow-md overflow-hidden bg-gray-50"
                 >
                   {/* User Header */}
                   <div className="bg-gradient-to-r from-indigo-100 to-indigo-200 px-4 py-3 flex justify-between items-center">
                     <span className="font-semibold text-indigo-900 text-lg">
-                      {username}
+                      {data.user?.name || "Unknown User"}
                     </span>
                     <span className="text-indigo-700 text-sm font-medium">
-                      {userBookings.length} bookings
+                      {data.bookings.length} bookings
                     </span>
                   </div>
 
@@ -103,7 +102,7 @@ export default function BookingHistory({ bookings, onClose }) {
                             } hover:bg-indigo-50 transition-colors`}
                           >
                             <td className="px-4 py-3 font-medium text-gray-800">
-                              {booking.userId?.username || "Unknown"}
+                              {booking.userId?.name || "Unknown"}
                             </td>
                             <td className="px-4 py-3 text-gray-700">
                               {booking.userId?.email || "Unknown"}
@@ -131,10 +130,10 @@ export default function BookingHistory({ bookings, onClose }) {
                   </div>
 
                   {/* Toggle Button */}
-                  {userBookings.length > 3 && (
+                  {data.bookings.length > 3 && (
                     <div className="flex justify-center py-3 bg-gray-100">
                       <button
-                        onClick={() => toggleExpand(username)}
+                        onClick={() => toggleExpand(userId)}
                         className="text-indigo-600 font-medium hover:underline"
                       >
                         {isExpanded ? "Show Less" : "Show More"}
@@ -145,51 +144,45 @@ export default function BookingHistory({ bookings, onClose }) {
               );
             })}
 
-            {/* Pagination (numbered) */}
+            {/* Pagination */}
             {totalPages > 1 && (
               <div className="flex justify-center items-center gap-2 mt-6">
-                {/* Previous */}
                 <button
                   disabled={currentPage === 1}
                   onClick={() => setCurrentPage((p) => p - 1)}
-                  className={`px-3 py-1 rounded-lg text-sm font-medium shadow 
-                    ${
-                      currentPage === 1
-                        ? "bg-gray-200 text-gray-500 cursor-not-allowed"
-                        : "bg-indigo-500 text-white hover:bg-indigo-600"
-                    }`}
+                  className={`px-3 py-1 rounded-lg text-sm font-medium shadow ${
+                    currentPage === 1
+                      ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                      : "bg-indigo-500 text-white hover:bg-indigo-600"
+                  }`}
                 >
                   Prev
                 </button>
 
-                {/* Page numbers */}
                 {Array.from({ length: totalPages }, (_, i) => i + 1).map(
                   (page) => (
                     <button
                       key={page}
                       onClick={() => setCurrentPage(page)}
-                      className={`px-3 py-1 rounded-lg text-sm font-medium shadow 
-                        ${
-                          currentPage === page
-                            ? "bg-indigo-600 text-white"
-                            : "bg-gray-100 text-gray-700 hover:bg-indigo-100"
-                        }`}
+                      className={`px-3 py-1 rounded-lg text-sm font-medium shadow ${
+                        currentPage === page
+                          ? "bg-indigo-600 text-white"
+                          : "bg-gray-100 text-gray-700 hover:bg-indigo-100"
+                      }`}
                     >
                       {page}
                     </button>
                   )
                 )}
 
-                {/* Next */}
                 <button
                   disabled={currentPage === totalPages}
                   onClick={() => setCurrentPage((p) => p + 1)}
-                  className={`px-3 py-1 rounded-lg text-sm font-medium shadow 
-                    ${
-                      currentPage === totalPages
-                        ? "bg-gray-200 text-gray-500 cursor-not-allowed"
-                        : "bg-indigo-500 text-white hover:bg-indigo-600"
-                    }`}
+                  className={`px-3 py-1 rounded-lg text-sm font-medium shadow ${
+                    currentPage === totalPages
+                      ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                      : "bg-indigo-500 text-white hover:bg-indigo-600"
+                  }`}
                 >
                   Next
                 </button>
