@@ -1,8 +1,8 @@
-// src/pages/AdminDashboard/BookingHistory.jsx
 import { useState } from "react";
 
 export default function BookingHistory({ bookings, onClose }) {
   const [expandedUsers, setExpandedUsers] = useState({});
+  const [currentPage, setCurrentPage] = useState(1);
 
   const toggleExpand = (username) => {
     setExpandedUsers((prev) => ({
@@ -10,6 +10,24 @@ export default function BookingHistory({ bookings, onClose }) {
       [username]: !prev[username],
     }));
   };
+
+  // Group bookings by user
+  const groupedBookings = Object.entries(
+    bookings.reduce((acc, booking) => {
+      const username =
+        booking.userId?.username || booking.userId?.email || "Unknown User";
+      if (!acc[username]) acc[username] = [];
+      acc[username].push(booking);
+      return acc;
+    }, {})
+  );
+
+  // Pagination for users
+  const usersPerPage = 4;
+  const totalPages = Math.ceil(groupedBookings.length / usersPerPage);
+  const startIndex = (currentPage - 1) * usersPerPage;
+  const endIndex = startIndex + usersPerPage;
+  const visibleUsers = groupedBookings.slice(startIndex, endIndex);
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm z-50 px-4">
@@ -36,17 +54,8 @@ export default function BookingHistory({ bookings, onClose }) {
           </p>
         ) : (
           <>
-            {Object.entries(
-              bookings.reduce((acc, booking) => {
-                const username =
-                  booking.userId?.username ||
-                  booking.userId?.email ||
-                  "Unknown User";
-                if (!acc[username]) acc[username] = [];
-                acc[username].push(booking);
-                return acc;
-              }, {})
-            ).map(([username, userBookings]) => {
+            {/* User Cards */}
+            {visibleUsers.map(([username, userBookings]) => {
               const isExpanded = expandedUsers[username];
               const visibleBookings = isExpanded
                 ? userBookings
@@ -67,11 +76,11 @@ export default function BookingHistory({ bookings, onClose }) {
                     </span>
                   </div>
 
-                  {/* Table with smooth expand/collapse */}
+                  {/* Table */}
                   <div
                     className={`transition-[max-height] duration-500 ease-in-out overflow-hidden`}
                     style={{
-                      maxHeight: isExpanded ? "500px" : "220px", // adjusts smoothly
+                      maxHeight: isExpanded ? "500px" : "220px",
                     }}
                   >
                     <table className="w-full text-sm text-left border-separate border-spacing-0">
@@ -121,7 +130,7 @@ export default function BookingHistory({ bookings, onClose }) {
                     </table>
                   </div>
 
-                  {/* Show More / Show Less when length greater than 3 then add button */}
+                  {/* Toggle Button */}
                   {userBookings.length > 3 && (
                     <div className="flex justify-center py-3 bg-gray-100">
                       <button
@@ -135,6 +144,57 @@ export default function BookingHistory({ bookings, onClose }) {
                 </div>
               );
             })}
+
+            {/* Pagination (numbered) */}
+            {totalPages > 1 && (
+              <div className="flex justify-center items-center gap-2 mt-6">
+                {/* Previous */}
+                <button
+                  disabled={currentPage === 1}
+                  onClick={() => setCurrentPage((p) => p - 1)}
+                  className={`px-3 py-1 rounded-lg text-sm font-medium shadow 
+                    ${
+                      currentPage === 1
+                        ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                        : "bg-indigo-500 text-white hover:bg-indigo-600"
+                    }`}
+                >
+                  Prev
+                </button>
+
+                {/* Page numbers */}
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                  (page) => (
+                    <button
+                      key={page}
+                      onClick={() => setCurrentPage(page)}
+                      className={`px-3 py-1 rounded-lg text-sm font-medium shadow 
+                        ${
+                          currentPage === page
+                            ? "bg-indigo-600 text-white"
+                            : "bg-gray-100 text-gray-700 hover:bg-indigo-100"
+                        }`}
+                    >
+                      {page}
+                    </button>
+                  )
+                )}
+
+                {/* Next */}
+                <button
+                  disabled={currentPage === totalPages}
+                  onClick={() => setCurrentPage((p) => p + 1)}
+                  className={`px-3 py-1 rounded-lg text-sm font-medium shadow 
+                    ${
+                      currentPage === totalPages
+                        ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                        : "bg-indigo-500 text-white hover:bg-indigo-600"
+                    }`}
+                >
+                  Next
+                </button>
+              </div>
+            )}
           </>
         )}
       </div>
