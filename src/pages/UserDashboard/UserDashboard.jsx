@@ -191,6 +191,7 @@ export default function UserDashboard() {
 
       {sidebarOpen && (
         <Sidebar
+          sidebarOpen={sidebarOpen} // add this prop
           setSidebarOpen={setSidebarOpen}
           profilePicture={profilePicture}
           username={username}

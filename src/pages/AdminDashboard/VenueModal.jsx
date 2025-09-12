@@ -1,3 +1,5 @@
+import { eachHourOfInterval, format } from "date-fns";
+
 export default function VenueModal({
   formData,
   onChange,
@@ -5,6 +7,15 @@ export default function VenueModal({
   editingVenue,
   onClose,
 }) {
+  // generate 24-hour slots (midnight → 11 PM)
+  const hours = eachHourOfInterval({
+    start: new Date(2023, 0, 1, 0), // 12:00 AM
+    end: new Date(2023, 0, 1, 23), // 11:00 PM
+  }).map((date) => ({
+    value: format(date, "HH:mm"), // "00:00", "01:00", etc.
+    label: format(date, "h a"), // "12 AM", "1 AM", etc.
+  }));
+
   return (
     <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex justify-center items-center z-50">
       <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-lg relative">
@@ -32,7 +43,6 @@ export default function VenueModal({
             className="w-full p-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-400"
             required
           />
-
           <input
             type="text"
             name="name"
@@ -42,7 +52,6 @@ export default function VenueModal({
             className="w-full p-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-400"
             required
           />
-
           <input
             type="text"
             name="location"
@@ -52,7 +61,6 @@ export default function VenueModal({
             className="w-full p-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-400"
             required
           />
-
           <input
             type="number"
             name="capacity"
@@ -62,7 +70,6 @@ export default function VenueModal({
             className="w-full p-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-400"
             required
           />
-
           <input
             type="date"
             name="date"
@@ -72,11 +79,46 @@ export default function VenueModal({
             required
           />
 
+          {/* Opening & Closing Time */}
+          <div className="grid grid-cols-2 gap-4">
+            <select
+              name="opening"
+              value={formData.opening || ""}
+              onChange={onChange}
+              className="w-full p-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-400"
+              required
+            >
+              <option value="">Select Opening Time</option>
+              {hours.map((h) => (
+                <option key={h.value} value={h.value}>
+                  {h.label}
+                </option>
+              ))}
+            </select>
+
+            <select
+              name="closing"
+              value={formData.closing || ""}
+              onChange={onChange}
+              className="w-full p-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-400"
+              required
+            >
+              <option value="">Select Closing Time</option>
+              {hours.map((h) => (
+                <option key={h.value} value={h.value}>
+                  {h.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Price per hour */}
           <input
-            type="time"
-            name="time"
-            value={formData.time}
+            type="number"
+            name="price"
+            value={formData.price}
             onChange={onChange}
+            placeholder="Price (₹/hr)"
             className="w-full p-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-400"
             required
           />

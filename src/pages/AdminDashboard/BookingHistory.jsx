@@ -1,8 +1,40 @@
+import { useState } from "react";
+
 export default function BookingHistory({ bookings, onClose }) {
+  const [expandedUsers, setExpandedUsers] = useState({});
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const toggleExpand = (userId) => {
+    setExpandedUsers((prev) => ({
+      ...prev,
+      [userId]: !prev[userId],
+    }));
+  };
+
+  // Group bookings by user
+  const groupedBookings = Object.entries(
+    bookings.reduce((acc, booking) => {
+      // const userId = booking.userId?._id || "unknown";
+      const userId =
+  (booking.userId?.firstName
+    ? `${booking.userId.firstName} ${booking.userId.lastName || ""}`
+    : booking.userId?.email) || "Unknown User";
+      if (!acc[userId]) acc[userId] = { user: booking.userId, bookings: [] };
+      acc[userId].bookings.push(booking);
+      return acc;
+    }, {})
+  );
+
+  // Pagination for users
+  const usersPerPage = 4;
+  const totalPages = Math.ceil(groupedBookings.length / usersPerPage);
+  const startIndex = (currentPage - 1) * usersPerPage;
+  const endIndex = startIndex + usersPerPage;
+  const visibleUsers = groupedBookings.slice(startIndex, endIndex);
+
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm z-50 px-4">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl p-6 relative max-h-[85vh] overflow-y-auto border border-gray-200">
-        {/* Close Button */}
         {/* Close Button */}
         <button
           onClick={onClose}
@@ -25,79 +57,143 @@ export default function BookingHistory({ bookings, onClose }) {
           </p>
         ) : (
           <>
-            {Object.entries(
-              bookings.reduce((acc, booking) => {
-                const username =
-                  booking.userId?.username ||
-                  booking.userId?.email ||
-                  "Unknown User";
-                if (!acc[username]) acc[username] = [];
-                acc[username].push(booking);
-                return acc;
-              }, {})
-            ).map(([username, userBookings]) => (
-              <div
-                key={username}
-                className="mb-6 border rounded-xl shadow-md overflow-hidden bg-gray-50"
-              >
-                {/* User Header */}
-                <div className="bg-gradient-to-r from-indigo-100 to-indigo-200 px-4 py-3 flex justify-between items-center">
-                  <span className="font-semibold text-indigo-900 text-lg">
-                    {username}
-                  </span>
-                  <span className="text-indigo-700 text-sm font-medium">
-                    {userBookings.length} bookings
-                  </span>
-                </div>
+            {/* User Cards */}
+            {visibleUsers.map(([userId, data]) => {
+              const isExpanded = expandedUsers[userId];
+              const visibleBookings = isExpanded
+                ? data.bookings
+                : data.bookings.slice(0, 2);
 
-                {/* Table */}
-                <div className="max-h-64 overflow-y-auto">
-                  <table className="w-full text-sm text-left border-separate border-spacing-0">
-                    <thead className="sticky top-0 bg-gradient-to-r from-indigo-500 to-indigo-600 shadow-md border-b-2 border-black z-10">
-                      <tr className="text-white uppercase text-xs font-bold tracking-wide">
-                        <th className="px-4 py-2">User Name</th>
-                        <th className="px-4 py-2">Venue</th>
-                        <th className="px-4 py-2">Date</th>
-                        <th className="px-4 py-2">Time</th>
-                        <th className="px-4 py-2">Players</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {userBookings.map((booking, index) => (
-                        <tr
-                          key={booking._id}
-                          className={`border-b ${
-                            index % 2 === 0 ? "bg-white" : "bg-gray-50"
-                          } hover:bg-indigo-50 transition-colors`}
-                        >
-                          <td className="px-4 py-3 font-medium text-gray-800">
-                            {booking.userId?.username ||
-                              booking.userId?.email ||
-                              "Unknown User"}
-                          </td>
-                          <td className="px-4 py-3 text-gray-700">
-                            {booking.venueId?.name || "Unknown Venue"}
-                          </td>
-                          <td className="px-4 py-3 text-gray-600">
-                            {booking.date
-                              ? new Date(booking.date).toLocaleDateString(
-                                  "en-GB"
-                                )
-                              : "Unknown"}
-                          </td>
-                          <td className="px-4 py-3 text-gray-600">
-                            {booking.time || "Unknown"}
-                          </td>
-                          <td className="px-4 py-3 text-gray-600">
-                            {booking.players || "-"}
-                          </td>
+              return (
+                <div
+                  key={userId}
+                  className="mb-6 border rounded-xl shadow-md overflow-hidden bg-gray-50"
+                >
+                  {/* User Header */}
+                  <div className="bg-gradient-to-r from-indigo-100 to-indigo-200 px-4 py-3 flex justify-between items-center">
+                    <span className="font-semibold text-indigo-900 text-lg">
+                      {userId || "Unknown User"}
+                    </span>
+                    <span className="text-indigo-700 text-sm font-medium">
+                      {data.bookings.length} bookings
+                    </span>
+                  </div>
+
+                  {/* Table */}
+                  <div
+                    className={`transition-[max-height] duration-500 ease-in-out overflow-hidden`}
+                    style={{
+                      maxHeight: isExpanded ? "500px" : "220px",
+                    }}
+                  >
+                    <table className="w-full text-sm text-left border-separate border-spacing-0">
+                      <thead className="sticky top-0 bg-gradient-to-r from-indigo-500 to-indigo-600 shadow-md border-b-2 border-black z-10">
+                        <tr className="text-white uppercase text-xs font-bold tracking-wide">
+                          <th className="px-4 py-2">Username</th>
+                          <th className="px-4 py-2">Email</th>
+                          <th className="px-4 py-2">Venue</th>
+                          <th className="px-4 py-2">Date</th>
+                          <th className="px-4 py-2">Time</th>
+                          <th className="px-4 py-2">Players</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody>
+                        {visibleBookings.map((booking, index) => (
+                          <tr
+                            key={booking._id}
+                            className={`border-b ${
+                              index % 2 === 0 ? "bg-white" : "bg-gray-50"
+                            } hover:bg-indigo-50 transition-colors`}
+                          >
+                            <td className="px-4 py-3 font-medium text-gray-800">
+                            {booking.userId?.firstName
+                              ? `${booking.userId.firstName} ${booking.userId.lastName || ""}`
+                              : booking.userId?.email || "Unknown User"}
+                          </td>
+                            <td className="px-4 py-3 text-gray-700">
+                              {booking.userId?.email || "Unknown"}
+                            </td>
+                            <td className="px-4 py-3 text-gray-700">
+                              {booking.venueId?.name || "Unknown Venue"}
+                            </td>
+                            <td className="px-4 py-3 text-gray-600">
+                              {booking.date
+                                ? new Date(booking.date).toLocaleDateString(
+                                    "en-GB"
+                                  )
+                                : "Unknown"}
+                            </td>
+                            <td className="px-4 py-3 text-gray-600">
+                              {booking.time || "Unknown"}
+                            </td>
+                            <td className="px-4 py-3 text-gray-600">
+                              {booking.players || "-"}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Toggle Button */}
+                  {data.bookings.length > 3 && (
+                    <div className="flex justify-center py-3 bg-gray-100">
+                      <button
+                        onClick={() => toggleExpand(userId)}
+                        className="text-indigo-600 font-medium hover:underline"
+                      >
+                        {isExpanded ? "Show Less" : "Show More"}
+                      </button>
+                    </div>
+                  )}
                 </div>
+              );
+            })}
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="flex justify-center items-center gap-2 mt-6">
+                <button
+                  disabled={currentPage === 1}
+                  onClick={() => setCurrentPage((p) => p - 1)}
+                  className={`px-3 py-1 rounded-lg text-sm font-medium shadow ${
+                    currentPage === 1
+                      ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                      : "bg-indigo-500 text-white hover:bg-indigo-600"
+                  }`}
+                >
+                  Prev
+                </button>
+
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                  (page) => (
+                    <button
+                      key={page}
+                      onClick={() => setCurrentPage(page)}
+                      className={`px-3 py-1 rounded-lg text-sm font-medium shadow ${
+                        currentPage === page
+                          ? "bg-indigo-600 text-white"
+                          : "bg-gray-100 text-gray-700 hover:bg-indigo-100"
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  )
+                )}
+
+                <button
+                  disabled={currentPage === totalPages}
+                  onClick={() => setCurrentPage((p) => p + 1)}
+                  className={`px-3 py-1 rounded-lg text-sm font-medium shadow ${
+                    currentPage === totalPages
+                      ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                      : "bg-indigo-500 text-white hover:bg-indigo-600"
+                  }`}
+                >
+                  Next
+                </button>
               </div>
-            ))}
+            )}
           </>
         )}
       </div>
