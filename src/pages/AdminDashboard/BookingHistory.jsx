@@ -14,7 +14,11 @@ export default function BookingHistory({ bookings, onClose }) {
   // Group bookings by user
   const groupedBookings = Object.entries(
     bookings.reduce((acc, booking) => {
-      const userId = booking.userId?._id || "unknown";
+      // const userId = booking.userId?._id || "unknown";
+      const userId =
+  (booking.userId?.firstName
+    ? `${booking.userId.firstName} ${booking.userId.lastName || ""}`
+    : booking.userId?.email) || "Unknown User";
       if (!acc[userId]) acc[userId] = { user: booking.userId, bookings: [] };
       acc[userId].bookings.push(booking);
       return acc;
@@ -68,7 +72,7 @@ export default function BookingHistory({ bookings, onClose }) {
                   {/* User Header */}
                   <div className="bg-gradient-to-r from-indigo-100 to-indigo-200 px-4 py-3 flex justify-between items-center">
                     <span className="font-semibold text-indigo-900 text-lg">
-                      {data.user?.name || "Unknown User"}
+                      {userId || "Unknown User"}
                     </span>
                     <span className="text-indigo-700 text-sm font-medium">
                       {data.bookings.length} bookings
@@ -102,8 +106,10 @@ export default function BookingHistory({ bookings, onClose }) {
                             } hover:bg-indigo-50 transition-colors`}
                           >
                             <td className="px-4 py-3 font-medium text-gray-800">
-                              {booking.userId?.name || "Unknown"}
-                            </td>
+                            {booking.userId?.firstName
+                              ? `${booking.userId.firstName} ${booking.userId.lastName || ""}`
+                              : booking.userId?.email || "Unknown User"}
+                          </td>
                             <td className="px-4 py-3 text-gray-700">
                               {booking.userId?.email || "Unknown"}
                             </td>
