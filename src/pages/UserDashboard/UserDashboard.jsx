@@ -178,6 +178,7 @@ export default function UserDashboard() {
         profilePicture={profilePicture}
         username={username}
         setSidebarOpen={setSidebarOpen}
+        venues={venues}
       />
 
       <Welcome username={username} scrollToGames={scrollToGames} />
