@@ -1,8 +1,10 @@
 import { useState } from "react";
+import { FaSearch } from "react-icons/fa";
 
 export default function BookingHistory({ bookings, onClose }) {
   const [expandedUsers, setExpandedUsers] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const toggleExpand = (userId) => {
     setExpandedUsers((prev) => ({
@@ -14,27 +16,45 @@ export default function BookingHistory({ bookings, onClose }) {
   // Group bookings by user
   const groupedBookings = Object.entries(
     bookings.reduce((acc, booking) => {
-      // const userId = booking.userId?._id || "unknown";
-      const userId =
-  (booking.userId?.firstName
-    ? `${booking.userId.firstName} ${booking.userId.lastName || ""}`
-    : booking.userId?.email) || "Unknown User";
-      if (!acc[userId]) acc[userId] = { user: booking.userId, bookings: [] };
-      acc[userId].bookings.push(booking);
+      const displayName =
+        (booking.userId?.firstName
+          ? `${booking.userId.firstName} ${booking.userId.lastName || ""}`
+          : booking.userId?.email) || "Unknown User";
+
+      if (!acc[displayName])
+        acc[displayName] = { user: booking.userId, bookings: [] };
+      acc[displayName].bookings.push(booking);
       return acc;
     }, {})
   );
 
+  // 🔍 Filtered results based on search
+  const filteredBookings = groupedBookings.filter(([userId, data]) => {
+    const username = data.user?.firstName
+      ? `${data.user.firstName} ${data.user.lastName || ""}`.toLowerCase()
+      : "";
+    const email = data.user?.email?.toLowerCase() || "";
+    const venues = data.bookings
+      .map((b) => b.venueId?.name?.toLowerCase() || "")
+      .join(" ");
+
+    return (
+      username.includes(searchTerm.toLowerCase()) ||
+      email.includes(searchTerm.toLowerCase()) ||
+      venues.includes(searchTerm.toLowerCase())
+    );
+  });
+
   // Pagination for users
   const usersPerPage = 4;
-  const totalPages = Math.ceil(groupedBookings.length / usersPerPage);
+  const totalPages = Math.ceil(filteredBookings.length / usersPerPage);
   const startIndex = (currentPage - 1) * usersPerPage;
   const endIndex = startIndex + usersPerPage;
-  const visibleUsers = groupedBookings.slice(startIndex, endIndex);
+  const visibleUsers = filteredBookings.slice(startIndex, endIndex);
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm z-50 px-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl p-6 relative max-h-[85vh] overflow-y-auto border border-gray-200">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl p-6 relative max-h-[85vh] overflow-y-auto border border-gray-200">
         {/* Close Button */}
         <button
           onClick={onClose}
@@ -46,14 +66,33 @@ export default function BookingHistory({ bookings, onClose }) {
         </button>
 
         {/* Title */}
-        <h2 className="text-3xl font-extrabold mb-6 text-center text-indigo-600 tracking-wide">
+        <h2 className="text-2xl font-extrabold mb-6 text-center text-indigo-500 tracking-wide">
           Booking History
         </h2>
+
+        {/* Search Bar */}
+        <div className="relative mb-6 flex items-center bg-indigo-100 rounded-lg px-3 py-2 w-full max-w-md mx-auto shadow-sm">
+          <FaSearch className="text-indigo-600 mr-2" />
+          <input
+            type="text"
+            placeholder="Search by username, email, or venue..."
+            className="flex-1 bg-transparent outline-none text-sm text-indigo-900 placeholder-indigo-500"
+            value={searchTerm}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              setCurrentPage(1); // reset to first page after new search
+            }}
+          />
+        </div>
 
         {/* No bookings */}
         {bookings.length === 0 ? (
           <p className="text-gray-500 italic text-center bg-gray-50 p-4 rounded-lg shadow-sm">
             No bookings yet.
+          </p>
+        ) : filteredBookings.length === 0 ? (
+          <p className="text-gray-500 italic text-center bg-gray-50 p-4 rounded-lg shadow-sm">
+            No results found for "{searchTerm}"
           </p>
         ) : (
           <>
@@ -106,10 +145,12 @@ export default function BookingHistory({ bookings, onClose }) {
                             } hover:bg-indigo-50 transition-colors`}
                           >
                             <td className="px-4 py-3 font-medium text-gray-800">
-                            {booking.userId?.firstName
-                              ? `${booking.userId.firstName} ${booking.userId.lastName || ""}`
-                              : booking.userId?.email || "Unknown User"}
-                          </td>
+                              {booking.userId?.firstName
+                                ? `${booking.userId.firstName} ${
+                                    booking.userId.lastName || ""
+                                  }`
+                                : booking.userId?.email || "Unknown User"}
+                            </td>
                             <td className="px-4 py-3 text-gray-700">
                               {booking.userId?.email || "Unknown"}
                             </td>

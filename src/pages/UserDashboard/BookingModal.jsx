@@ -1,5 +1,5 @@
 // src/pages/UserDashboard/BookingModal.jsx
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FaCalendarAlt, FaChevronDown } from "react-icons/fa";
 
 export default function BookingModal({
@@ -13,11 +13,36 @@ export default function BookingModal({
   setSelectedVenue,
 }) {
   const [showTimeDropdown, setShowTimeDropdown] = useState(false);
-
+  const [bookedSlots, setBookedSlots] = useState([]);
   // Ensure bookingForm.time is always an array
   const currentSlots = Array.isArray(bookingForm.time) ? bookingForm.time : [];
+  // Add derived price calculation
+  const totalPrice = (selectedVenue.price || 0) * currentSlots.length;
+
+  // Fetch booked slots for selected venue and date
+  useEffect(() => {
+    if (!selectedVenue || !bookingForm.date) return;
+
+    const fetchBookedSlots = async () => {
+      try {
+       const res = await fetch(
+         `http://localhost:5002/api/bookings/venue/${selectedVenue._id}?date=${bookingForm.date}`
+       );
+        const data = await res.json();
+        setBookedSlots(data.bookedSlots || []);
+      } catch (err) {
+        console.error("Failed to fetch booked slots:", err);
+      }
+    };
+
+    fetchBookedSlots();
+  }, [selectedVenue, bookingForm.date]);
 
   const toggleTimeSelection = (slot) => {
+    if (bookedSlots.includes(slot)) {
+      alert(`${slot} is already booked!`);
+      return;
+    }
     if (currentSlots.includes(slot)) {
       handleBookingChange({
         target: { name: "time", value: currentSlots.filter((s) => s !== slot) },
@@ -28,6 +53,31 @@ export default function BookingModal({
       });
     }
   };
+  function generateTimeSlots(openingTime, closingTime, interval = 60) {
+    const slots = [];
+    const [openH, openM] = openingTime.split(":").map(Number);
+    const [closeH, closeM] = closingTime.split(":").map(Number);
+
+    let current = new Date(2023, 0, 1, openH, openM);
+    const end = new Date(2023, 0, 1, closeH, closeM);
+
+    while (current < end) {
+      const next = new Date(current.getTime() + interval * 60000);
+
+      const label = `${new Intl.DateTimeFormat("en-US", {
+        hour: "numeric",
+        minute: "2-digit",
+      }).format(current)} – ${new Intl.DateTimeFormat("en-US", {
+        hour: "numeric",
+        minute: "2-digit",
+      }).format(next)}`;
+
+      slots.push(label);
+      current = next;
+    }
+
+    return slots;
+  }
 
   return (
     <div className="fixed inset-0 flex items-center justify-center backdrop-blur bg-black/30 z-60 px-4">
@@ -37,7 +87,15 @@ export default function BookingModal({
           Book {selectedVenue.name}
         </h2>
 
-        <form onSubmit={handleBookingSubmit} className="space-y-4">
+        <form
+          onSubmit={(e) => {
+            e.preventDefault(); // prevent default form reload
+            handleBookingSubmit(e); // run your existing booking logic
+            setModalOpen(false); // close modal
+            setSelectedVenue(null); // reset venue
+          }}
+          className="space-y-4"
+        >
           {/* Username */}
           <div>
             <label className="block text-sm font-medium mb-1">Name</label>
@@ -76,34 +134,55 @@ export default function BookingModal({
           {/* Time Slots Multi-Select Dropdown */}
           <div className="relative">
             <label className="block text-sm font-medium mb-1">Time Slots</label>
+
+            {/* Dropdown button */}
             <div
               className="border rounded-md px-3 py-2 flex justify-between items-center cursor-pointer"
-              onClick={() => setShowTimeDropdown(!showTimeDropdown)}
+              onClick={() => setShowTimeDropdown((prev) => !prev)}
             >
               <span>
                 {currentSlots.length > 0
                   ? currentSlots.join(", ")
                   : "Select time slots"}
               </span>
-              <FaChevronDown />
+              <FaChevronDown
+                className={`transition-transform duration-300 ${
+                  showTimeDropdown ? "rotate-180" : ""
+                }`}
+              />
             </div>
 
+            {/* Dropdown list - only visible when showTimeDropdown = true */}
             {showTimeDropdown && (
-              <div className="absolute z-10 mt-1 w-full bg-white border rounded-md shadow-lg max-h-40 overflow-auto">
-                {selectedVenue.availableTimes?.map((slot, idx) => (
-                  <label
-                    key={idx}
-                    className="flex items-center px-3 py-2 cursor-pointer hover:bg-gray-100"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={currentSlots.includes(slot)}
-                      onChange={() => toggleTimeSelection(slot)}
-                      className="mr-2"
-                    />
-                    {slot}
-                  </label>
-                ))}
+              <div className="absolute mt-1 w-full max-h-28 overflow-y-auto border rounded-md bg-white shadow-lg z-10">
+                {selectedVenue.openingTime && selectedVenue.closingTime ? (
+                  generateTimeSlots(
+                    selectedVenue.openingTime,
+                    selectedVenue.closingTime
+                  ).map((slot, idx) => (
+                    <label
+                      key={idx}
+                      className={`flex items-center px-3 py-2 cursor-pointer hover:bg-gray-100 ${
+                        bookedSlots.includes(slot)
+                          ? "opacity-50 cursor-not-allowed"
+                          : ""
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={currentSlots.includes(slot)}
+                        disabled={bookedSlots.includes(slot)}
+                        onChange={() => toggleTimeSelection(slot)}
+                        className="mr-2"
+                      />
+                      {slot} {bookedSlots.includes(slot) && "(Booked)"}
+                    </label>
+                  ))
+                ) : (
+                  <div className="px-3 py-2 text-gray-500 italic">
+                    No time slots available
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -127,20 +206,16 @@ export default function BookingModal({
 
           {/* Footer Buttons */}
           <div className="flex justify-between items-center gap-3 mt-6">
-            {/* Price Button */}
-            <button
-              type="button"
-              className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors duration-300"
-              onClick={() => alert(`Price: ${selectedVenue.price || "N/A"}`)}
-            >
-              Price
-            </button>
+            {/* Price Display */}
+            <div className="px-4 py-2 bg-green-300 text-green-800 font-semibold rounded-md">
+              Price: ₹{totalPrice}
+            </div>
 
             <div className="flex gap-3">
               {/* Cancel */}
               <button
                 type="button"
-                className="px-4 py-2 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors duration-300"
+                className="px-4 py-2 bg-red-400 text-white rounded-md hover:bg-red-500 transition-colors duration-300"
                 onClick={() => {
                   setModalOpen(false);
                   setSelectedVenue(null);

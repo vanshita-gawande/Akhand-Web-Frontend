@@ -1,4 +1,6 @@
 import { eachHourOfInterval, format } from "date-fns";
+import { Listbox } from "@headlessui/react";
+import { useState } from "react";
 
 export default function VenueModal({
   formData,
@@ -12,13 +14,24 @@ export default function VenueModal({
     start: new Date(2023, 0, 1, 0), // 12:00 AM
     end: new Date(2023, 0, 1, 23), // 11:00 PM
   }).map((date) => ({
-    value: format(date, "HH:mm"), // "00:00", "01:00", etc.
-    label: format(date, "h a"), // "12 AM", "1 AM", etc.
+    value: format(date, "HH:mm"), // "00:00", "01:00"
+    label: format(date, "h a"), // "12 AM", "1 AM"
   }));
+
+  // local state for Listbox (to make it controlled UI)
+  const [opening, setOpening] = useState(formData.opening || "");
+  const [closing, setClosing] = useState(formData.closing || "");
+
+  // sync back to parent formData
+  const handleChange = (name, value) => {
+    onChange({ target: { name, value } });
+    if (name === "opening") setOpening(value);
+    if (name === "closing") setClosing(value);
+  };
 
   return (
     <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex justify-center items-center z-50">
-      <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-lg relative">
+      <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-lg relative pb-16">
         {/* Close Button */}
         <button
           onClick={onClose}
@@ -68,6 +81,7 @@ export default function VenueModal({
             onChange={onChange}
             placeholder="Capacity"
             className="w-full p-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-400"
+            min="0"
             required
           />
           <input
@@ -81,35 +95,80 @@ export default function VenueModal({
 
           {/* Opening & Closing Time */}
           <div className="grid grid-cols-2 gap-4">
-            <select
-              name="opening"
-              value={formData.opening || ""}
-              onChange={onChange}
-              className="w-full p-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-400"
-              required
-            >
-              <option value="">Select Opening Time</option>
-              {hours.map((h) => (
-                <option key={h.value} value={h.value}>
-                  {h.label}
-                </option>
-              ))}
-            </select>
+            {/* Opening */}
+            <div>
+              <label className="block text-sm font-medium text-gray-600 mb-1">
+                Opening Time
+              </label>
+              <Listbox
+                value={opening}
+                onChange={(val) => handleChange("openingTime", val)}
+              >
+                <div className="relative">
+                  <Listbox.Button className="w-full p-3 border rounded-xl bg-white shadow-sm text-left focus:outline-none focus:ring-2 focus:ring-purple-400">
+                    {opening
+                      ? hours.find((h) => h.value === opening)?.label
+                      : "Select Opening"}
+                  </Listbox.Button>
 
-            <select
-              name="closing"
-              value={formData.closing || ""}
-              onChange={onChange}
-              className="w-full p-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-400"
-              required
-            >
-              <option value="">Select Closing Time</option>
-              {hours.map((h) => (
-                <option key={h.value} value={h.value}>
-                  {h.label}
-                </option>
-              ))}
-            </select>
+                  {/* Dropdown */}
+                  <div className="absolute mt-1 w-full">
+                    <Listbox.Options className="bg-white border rounded-xl shadow-lg max-h-40 overflow-y-auto z-50">
+                      {hours.map((h) => (
+                        <Listbox.Option
+                          key={h.value}
+                          value={h.value}
+                          className={({ active }) =>
+                            `cursor-pointer px-4 py-2 ${
+                              active ? "bg-purple-100" : ""
+                            }`
+                          }
+                        >
+                          {h.label}
+                        </Listbox.Option>
+                      ))}
+                    </Listbox.Options>
+                  </div>
+                </div>
+              </Listbox>
+            </div>
+
+            {/* Closing */}
+            <div>
+              <label className="block text-sm font-medium text-gray-600 mb-1">
+                Closing Time
+              </label>
+              <Listbox
+                value={closing}
+                onChange={(val) => handleChange("closingTime", val)}
+              >
+                <div className="relative">
+                  <Listbox.Button className="w-full p-3 border rounded-xl bg-white shadow-sm text-left focus:outline-none focus:ring-2 focus:ring-purple-400">
+                    {closing
+                      ? hours.find((h) => h.value === closing)?.label
+                      : "Select Closing"}
+                  </Listbox.Button>
+                  <Listbox.Options
+                    className="absolute left-0 mt-1 w-full bg-white border rounded-xl shadow-lg 
+  max-h-40 overflow-y-auto z-50"
+                  >
+                    {hours.map((h) => (
+                      <Listbox.Option
+                        key={h.value}
+                        value={h.value}
+                        className={({ active }) =>
+                          `cursor-pointer px-4 py-2 ${
+                            active ? "bg-purple-100" : ""
+                          }`
+                        }
+                      >
+                        {h.label}
+                      </Listbox.Option>
+                    ))}
+                  </Listbox.Options>
+                </div>
+              </Listbox>
+            </div>
           </div>
 
           {/* Price per hour */}
@@ -120,10 +179,11 @@ export default function VenueModal({
             onChange={onChange}
             placeholder="Price (₹/hr)"
             className="w-full p-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-400"
+            min="0"
             required
           />
 
-          {/* Submit Button */}
+          {/* Submit */}
           <button
             type="submit"
             className={`w-full p-3 rounded-xl text-white transition ${

@@ -106,5 +106,12 @@ export const getAdminBookings = async () => {
   return res.data;
 };
 
+// ------------------ STATS ------------------
+export const getStats = async () => {
+  const { data } = await API.get("/stats");
+  return data;
+};
+
+
 
 export default API;

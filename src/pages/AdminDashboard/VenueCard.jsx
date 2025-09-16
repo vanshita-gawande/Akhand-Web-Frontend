@@ -7,6 +7,14 @@ import {
   CalendarDays,
   Clock,
 } from "lucide-react";
+import { format } from "date-fns";
+
+// helper to format "HH:mm" → "h a"
+function formatTime(timeString) {
+  if (!timeString) return "";
+  const [hours, minutes] = timeString.split(":");
+  return format(new Date(2023, 0, 1, hours, minutes), "h a");
+}
 
 export default function VenueCard({ venue, onEdit, onDelete }) {
   return (
@@ -34,8 +42,13 @@ export default function VenueCard({ venue, onEdit, onDelete }) {
           <strong>Date:</strong> {venue.displayDate}
         </p>
         <p className="flex items-center gap-2">
-          <Clock size={16} className="text-orange-500" /> <strong>Time:</strong>{" "}
-          {venue.time}
+          <Clock size={16} className="text-orange-500" />{" "}
+          <strong>Available Slots:</strong>{" "}
+          {venue.openingTime && venue.closingTime
+            ? `${formatTime(venue.openingTime)} – ${formatTime(
+                venue.closingTime
+              )}`
+            : "Not specified"}
         </p>
       </div>
       <div className="flex justify-end gap-3 px-3 py-2 border-t border-gray-100">
