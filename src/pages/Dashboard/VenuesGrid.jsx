@@ -34,7 +34,7 @@ export default function VenuesGrid({
           {displayedVenues.map((venue) => (
             <div
               key={venue._id}
-              className="bg-gradient-to-b from-gray-50 to-white border border-gray-200 shadow-md hover:shadow-xl transition-all duration-300 flex flex-col"
+              className="bg-white border border-gray-200 shadow-md hover:shadow-xl transition-all duration-300 flex flex-col"
             >
               {/* Card Image */}
               <div className="relative h-48 w-full overflow-hidden">
@@ -43,13 +43,21 @@ export default function VenuesGrid({
                   alt={venue.name}
                   className="w-full h-full object-cover transform hover:scale-110 transition-transform duration-700"
                 />
-                {/* Sport Tag */}
-                <div className="absolute top-3 left-3 bg-indigo-600 text-white px-3 py-1 text-xs font-semibold uppercase tracking-wide shadow-md">
+
+                {/* Sport Tag (top-left, softer indigo) */}
+                <div
+                  className="absolute top-2 left-2 bg-indigo-500/80 text-white px-2 py-0.5 
+                    text-[11px] font-medium uppercase tracking-wide shadow-sm"
+                >
                   {venue.sport}
                 </div>
-                {/* Popular Tag */}
-                <div className="absolute bottom-3 right-3 bg-yellow-500 text-white px-2 py-1 text-xs font-medium flex items-center gap-1 shadow-md">
-                  <Trophy size={14} /> Popular
+
+                {/* Popular Tag (top-right, softer yellow) */}
+                <div
+                  className="absolute top-2 right-2 px-2 py-0.5 text-[11px] font-medium flex items-center gap-1 
+                    bg-yellow-300/90 text-gray-900 shadow-sm"
+                >
+                  <Trophy size={12} /> Popular
                 </div>
               </div>
 
@@ -75,7 +83,7 @@ export default function VenuesGrid({
                   </div>
                 </div>
 
-                {/* Actions */}
+                {/* Actions (kept as your old Book Now button) */}
                 <div className="mt-6 flex justify-between items-center border-t border-gray-200 pt-4">
                   <button
                     onClick={() => setSelectedVenue(venue)}

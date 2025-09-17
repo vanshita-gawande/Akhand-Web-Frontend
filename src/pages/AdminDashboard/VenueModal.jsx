@@ -150,7 +150,7 @@ export default function VenueModal({
                   </Listbox.Button>
                   <Listbox.Options
                     className="absolute left-0 mt-1 w-full bg-white border rounded-xl shadow-lg 
-  max-h-40 overflow-y-auto z-50"
+                    max-h-40 overflow-y-auto z-50"
                   >
                     {hours.map((h) => (
                       <Listbox.Option
