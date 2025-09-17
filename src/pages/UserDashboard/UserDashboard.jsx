@@ -1,13 +1,23 @@
 // src/pages/UserDashboard/UserDashboard.jsx
 import { useState, useEffect, useRef } from "react";
 import logo from "../../assets/logo.webp";
-import { FaBasketballBall, FaTableTennis, FaFutbol,
- FaVolleyballBall,
-  FaRunning, FaSwimmer, FaBiking, FaBaseballBall
+import {
+  FaBasketballBall,
+  FaTableTennis,
+  FaFutbol,
+  FaVolleyballBall,
+  FaRunning,
+  FaSwimmer,
+  FaBiking,
+  FaBaseballBall,
 } from "react-icons/fa";
 import { GiCricketBat, GiTennisRacket, GiHockey } from "react-icons/gi";
-import { getVenues, bookVenue, getUserBookings, cancelBooking } from "../../api";
-
+import {
+  getVenues,
+  bookVenue,
+  getUserBookings,
+  cancelBooking,
+} from "../../api";
 
 // child components
 import Header from "./Header";
@@ -21,8 +31,6 @@ import BookingHistoryModal from "./BookingHistoryModal";
 import LogoutPopup from "./popups/LogoutPopup";
 import BookingPopup from "./popups/BookingPopup";
 import CancelPopup from "./popups/CancelPopup";
-
-
 
 export default function UserDashboard() {
   //State is data that a component owns and can change over time. and can use for Example: opening/closing sidebar, booking modals, dropdown menus.
@@ -103,23 +111,32 @@ export default function UserDashboard() {
   const handleBookingSubmit = async (e) => {
     e.preventDefault();
     if (!selectedVenue) return;
+
+    const payload = {
+      name: selectedVenue.name,
+      date: bookingForm.date ? new Date(bookingForm.date) : null,
+      time: bookingForm.time,
+      players: Number(bookingForm.players),
+      venueId: selectedVenue._id,
+      pricePerSlot: selectedVenue.price || 0,
+      // totalPrice: (selectedVenue.price || 0) * Number(bookingForm.players), -- alreday in backend it is saving it as price variable
+    };
+
     try {
-      const payload = {
-        name: selectedVenue.name,
-        date: bookingForm.date ? new Date(bookingForm.date) : null,
-        time: bookingForm.time,
-        players: Number(bookingForm.players),
-        venueId: selectedVenue._id,
-      };
+      const res = await bookVenue(payload);
+      console.log("Booking response:", res);
 
-      await bookVenue(payload);
-
+      // ✅ Success state
       setBookingStatus("success");
       setShowBookingPopup(true);
+
+      // Reset/close modal
       setModalOpen(false);
       setSelectedVenue(null);
     } catch (err) {
-      console.error(err);
+      console.error("Booking failed:", err);
+
+      // ❌ Error state
       setBookingStatus("error");
       setShowBookingPopup(true);
     }
