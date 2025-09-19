@@ -1,36 +1,33 @@
 // src/pages/AdminDashboard/AdminDashboard.jsx
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import {getVenues,addVenue,updateVenue,deleteVenue,getAdminBookings,} from "../../api";
- // extract helpers here
+import {
+  getVenues,
+  addVenue,
+  updateVenue,
+  deleteVenue,
+  getAdminBookings,
+} from "../../api";
+
+// Components
 import Header from "./Header";
 import VenuesList from "./VenuesList";
 import VenueModal from "./VenueModal";
 import BookingHistory from "./BookingHistory";
 import Stats from "./Stats";
-// popups
+
+// Popups
 import DeletePopup from "./popups/DeletePopup";
 import LogoutPopup from "./popups/LogoutPopup";
-import SuccessPopup from "./popups/SuccessPopup";  
-// assets
-import logo from "../../assets/logo.webp";
+import SuccessPopup from "./popups/SuccessPopup";
 
+// Assets
+import logo from "../../assets/logo.webp";
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
-  const [venues, setVenues] = useState([]);
-  const [showModal, setShowModal] = useState(false);
-  const [showPopup, setShowPopup] = useState(false);
-  const [editingVenue, setEditingVenue] = useState(null);
-  const [actionType, setActionType] = useState(null); // "create" | "update" | null
-  // For Delete Confirmation Popup
-  const [showDeletePopup, setShowDeletePopup] = useState(false); // controls visibility
-  const [venueToDelete, setVenueToDelete] = useState(null); // stores the venue selected for deletion
-  const [showLogoutPopup, setShowLogoutPopup] = useState(false);
-  const [adminBookings, setAdminBookings] = useState([]);
-  const [showBookingHistory, setShowBookingHistory] = useState(false);
 
-
+  // Constants
   const initialFormData = {
     sport: "",
     name: "",
@@ -39,77 +36,82 @@ export default function AdminDashboard() {
     date: "",
     time: "",
   };
+
+  // State
+  const [venues, setVenues] = useState([]);
+  const [adminBookings, setAdminBookings] = useState([]);
   const [formData, setFormData] = useState(initialFormData);
 
-  const formatDateForDisplay = (dateString) => {
-    if (!dateString) return "";
-    return new Date(dateString).toLocaleDateString("en-GB");
+  const [editingVenue, setEditingVenue] = useState(null);
+  const [venueToDelete, setVenueToDelete] = useState(null);
+
+  const [showModal, setShowModal] = useState(false);
+  const [showPopup, setShowPopup] = useState(false);
+  const [showDeletePopup, setShowDeletePopup] = useState(false);
+  const [showLogoutPopup, setShowLogoutPopup] = useState(false);
+  const [showBookingHistory, setShowBookingHistory] = useState(false);
+
+  const [actionType, setActionType] = useState(null);
+
+  // Helpers
+  const resetForm = () => {
+    setFormData(initialFormData);
+    setEditingVenue(null);
+    setActionType(null);
   };
 
-  // Helper: safely convert various date strings -> yyyy-mm-dd (for <input type="date">)
+  const formatDateForDisplay = (dateString) =>
+    dateString ? new Date(dateString).toLocaleDateString("en-GB") : "";
+
   const toIsoDate = (dateStr) => {
     if (!dateStr) return "";
-    // already ISO with T
     if (dateStr.includes("T")) return dateStr.split("T")[0];
-    // already yyyy-mm-dd
     if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
-    // dd/mm/yyyy -> convert to yyyy-mm-dd
+
     const m = dateStr.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
     if (m) {
       const [, d, mon, y] = m;
       return `${y}-${mon.padStart(2, "0")}-${d.padStart(2, "0")}`;
     }
-    // try Date parsing fallback (avoid calling toISOString on invalid Date)
+
     const parsed = new Date(dateStr);
-    if (!isNaN(parsed.getTime())) {
-      return parsed.toISOString().split("T")[0];
-    }
-    return "";
+    return !isNaN(parsed.getTime()) ? parsed.toISOString().split("T")[0] : "";
   };
 
+  // Effects
   useEffect(() => {
     const token = localStorage.getItem("token");
-    if (!token) {
-      navigate("/");
-      return;
-    }
+    if (!token) return navigate("/");
+
     getVenues()
-      .then((data) => {
-        // Keep original date (ISO) and add displayDate for UI
-        const formatted = data.map((venue) => ({
-          ...venue,
-          displayDate: formatDateForDisplay(venue.date),
-        }));
-        setVenues(formatted);
-      })
+      .then((data) =>
+        setVenues(
+          data.map((venue) => ({
+            ...venue,
+            displayDate: formatDateForDisplay(venue.date),
+          }))
+        )
+      )
       .catch((err) => {
         if (err.response?.status === 401) {
-          localStorage.removeItem("token");
+          localStorage.clear();
           navigate("/");
-        } else {
-          console.error(err);
-        }
+        } else console.error(err);
       });
-  }, [navigate]);
-  // Fetch bookings for admin
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) return;
 
     getAdminBookings()
-      .then((data) => setAdminBookings(data))
+      .then(setAdminBookings)
       .catch((err) => console.error(err));
-  }, []);
+  }, [navigate]);
 
+  // Handlers
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
+    localStorage.clear();
     navigate("/");
   };
 
-  const handleChange = (e) => {
+  const handleChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -117,13 +119,12 @@ export default function AdminDashboard() {
       const payload = {
         ...formData,
         capacity: Number(formData.capacity),
-        date: new Date(formData.date).toISOString(), // date input is yyyy-mm-dd -> safe to convert
+        date: new Date(formData.date).toISOString(),
       };
 
       if (editingVenue) {
-        // Update
         const response = await updateVenue(editingVenue._id, payload);
-        const updated = response?.venue || response; // handle both shapes
+        const updated = response?.venue || response;
         setVenues((prev) =>
           prev.map((v) =>
             v._id === editingVenue._id
@@ -133,7 +134,6 @@ export default function AdminDashboard() {
         );
         setActionType("update");
       } else {
-        // Create
         const response = await addVenue(payload);
         const created = response?.venue || response;
         setVenues((prev) => [
@@ -145,31 +145,27 @@ export default function AdminDashboard() {
 
       setShowModal(false);
       setShowPopup(true);
-      setEditingVenue(null);
-      setFormData(initialFormData);
+      resetForm();
     } catch (error) {
       console.error(error);
-      setActionType("error"); // 🔥 mark as error
+      setActionType("error");
       setShowModal(false);
       setShowPopup(true);
     }
   };
-  
 
   const handleEdit = (venue) => {
-    // store selected venue and prepare the form safely
     setEditingVenue(venue);
-    const isoDate = toIsoDate(venue.date || venue.displayDate || "");
     setFormData({
       sport: venue.sport || "",
       name: venue.name || "",
       location: venue.location || "",
       capacity: venue.capacity ?? "",
-      date: isoDate,
+      date: toIsoDate(venue.date || venue.displayDate || ""),
       time: venue.time || "",
-      price: venue.price || 0, // ✅ important
-      openingTime: venue.openingTime || "", // ✅ include opening
-      closingTime: venue.closingTime || "", // ✅ include closing
+      price: venue.price || 0,
+      openingTime: venue.openingTime || "",
+      closingTime: venue.closingTime || "",
     });
     setShowModal(true);
   };
@@ -179,10 +175,8 @@ export default function AdminDashboard() {
     setShowDeletePopup(true);
   };
 
-
   const confirmDelete = async () => {
     if (!venueToDelete) return;
-
     try {
       await deleteVenue(venueToDelete._id);
       setVenues((prev) => prev.filter((v) => v._id !== venueToDelete._id));
@@ -195,19 +189,7 @@ export default function AdminDashboard() {
     }
   };
 
-
-  const cancelDelete = () => {
-    setShowDeletePopup(false);
-    setVenueToDelete(null);
-  };
-
-  const handlePopupClose = () => {
-    setShowPopup(false);
-    setFormData(initialFormData);
-    setEditingVenue(null);
-    setActionType(null);
-  };
-
+  // Render
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200">
       <Header
@@ -216,7 +198,9 @@ export default function AdminDashboard() {
         onBookingHistory={() => setShowBookingHistory(true)}
         onLogout={() => setShowLogoutPopup(true)}
       />
-     <Stats />
+
+      <Stats />
+
       <main className="p-6 space-y-10">
         <VenuesList
           venues={venues}
@@ -241,11 +225,12 @@ export default function AdminDashboard() {
           onClose={() => setShowBookingHistory(false)}
         />
       )}
+
       {showDeletePopup && (
         <DeletePopup
           venue={venueToDelete}
           onConfirm={confirmDelete}
-          onCancel={cancelDelete}
+          onCancel={() => setShowDeletePopup(false)}
         />
       )}
 
@@ -257,7 +242,10 @@ export default function AdminDashboard() {
       )}
 
       {showPopup && (
-        <SuccessPopup actionType={actionType} onClose={handlePopupClose} />
+        <SuccessPopup
+          actionType={actionType}
+          onClose={() => setShowPopup(false)}
+        />
       )}
     </div>
   );
