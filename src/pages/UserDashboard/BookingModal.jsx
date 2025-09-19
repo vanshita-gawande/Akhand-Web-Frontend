@@ -1,20 +1,37 @@
 // src/pages/UserDashboard/BookingModal.jsx
 import { useState, useEffect } from "react";
 import { FaCalendarAlt, FaChevronDown } from "react-icons/fa";
+import { useNavigate } from "react-router-dom"; // <<<--- IMPORT useNavigate
 
 export default function BookingModal({
   selectedVenue,
   bookingForm,
   handleBookingChange,
-  handleBookingSubmit,
+  // handleBookingSubmit,
   username,
   sportName,
   setModalOpen,
   setSelectedVenue,
+  userId, // <<<--- MAKE SURE YOU PASS userId AS A PROP TO THIS COMPONENT
+  onBookingSuccess, // ✅ ADD
+  onBookingError, // ✅ ADD
 }) {
   const [showTimeDropdown, setShowTimeDropdown] = useState(false);
   const [bookedSlots, setBookedSlots] = useState([]);
-  // Ensure bookingForm.time is always an array
+  const navigate = useNavigate(); // <<<--- INITIALIZE NAVIGATE
+
+  // Load Razorpay script when the modal opens
+  useEffect(() => {
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.async = true;
+    document.body.appendChild(script);
+
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
+
   const currentSlots = Array.isArray(bookingForm.time) ? bookingForm.time : [];
   // Add derived price calculation
   const totalPrice = (selectedVenue.price || 0) * currentSlots.length;
@@ -25,9 +42,9 @@ export default function BookingModal({
 
     const fetchBookedSlots = async () => {
       try {
-       const res = await fetch(
-         `http://localhost:5002/api/bookings/venue/${selectedVenue._id}?date=${bookingForm.date}`
-       );
+        const res = await fetch(
+          `http://localhost:5002/api/bookings/venue/${selectedVenue._id}?date=${bookingForm.date}`
+        );
         const data = await res.json();
         setBookedSlots(data.bookedSlots || []);
       } catch (err) {
@@ -53,6 +70,94 @@ export default function BookingModal({
       });
     }
   };
+  // <<<--- NEW FUNCTION TO HANDLE PAYMENT AND BOOKING ---<<<
+  const handlePayment = async (e) => {
+    e.preventDefault();
+
+    if (totalPrice <= 0) {
+      alert("Please select at least one time slot.");
+      return;
+    }
+
+    try {
+      // 1. Create Order on Backend
+      const orderResponse = await fetch(
+        "http://localhost:5002/api/payments/create-order",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ amount: totalPrice }),
+        }
+      );
+      const order = await orderResponse.json();
+
+      // 2. Configure Razorpay Options
+      const options = {
+        key: "rzp_test_R9YK7209hKJDcC", // <<<--- REPLACE WITH YOUR RAZORPAY KEY ID
+        amount: order.amount,
+        currency: order.currency,
+        name: "Akhand Sports",
+        description: `${selectedVenue.name}, ${selectedVenue.location}\nSport: ${sportName}\nDate: ${bookingForm.date}`,
+        order_id: order.id,
+        handler: async function (response) {
+          // 3. This function runs on successful payment
+          const bookingDetails = {
+            name: username,
+            date: bookingForm.date,
+            time: bookingForm.time,
+            players: bookingForm.players,
+            venueId: selectedVenue._id,
+            userId: userId, // Pass the logged-in user's ID
+            price: totalPrice,
+          };
+
+          // Verify the payment on the backend
+          const verificationResponse = await fetch(
+            "http://localhost:5002/api/payments/verify-payment",
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+                bookingDetails: bookingDetails, // Send all booking info for creation
+              }),
+            }
+          );
+
+          const result = await verificationResponse.json();
+
+          if (result.status === "success") {
+            // 4. On success, navigate to UserDashboard with a success message
+            setModalOpen(false);
+            setSelectedVenue(null);
+            // navigate("/userdashboard", {
+            //   state: { bookingStatus: "success" },
+            // });
+          if (onBookingSuccess) onBookingSuccess();
+          } else {
+            // alert("Payment verification failed. Please contact support.");
+            if (onBookingError) onBookingError();
+          }
+        },
+        prefill: {
+          name: username,
+        },
+        theme: {
+          color: "#4f46e5", // Indigo color from your button
+        },
+      };
+
+      // 5. Open the Razorpay payment modal
+      const rzp = new window.Razorpay(options);
+      rzp.open();
+    } catch (error) {
+      console.error("Payment process failed:", error);
+      alert("Could not initiate payment. Please try again.");
+    }
+  };
+
   function generateTimeSlots(openingTime, closingTime, interval = 60) {
     const slots = [];
     const [openH, openM] = openingTime.split(":").map(Number);
@@ -88,12 +193,13 @@ export default function BookingModal({
         </h2>
 
         <form
-          onSubmit={(e) => {
-            e.preventDefault(); // prevent default form reload
-            handleBookingSubmit(e); // run your existing booking logic
-            setModalOpen(false); // close modal
-            setSelectedVenue(null); // reset venue
-          }}
+          onSubmit={handlePayment}
+          // onSubmit={(e) => {
+          //   e.preventDefault(); // prevent default form reload
+          //   handleBookingSubmit(e); // run your existing booking logic
+          //   setModalOpen(false); // close modal
+          //   setSelectedVenue(null); // reset venue
+          // }}
           className="space-y-4"
         >
           {/* Username */}

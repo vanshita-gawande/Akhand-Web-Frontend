@@ -1,5 +1,5 @@
 // src/pages/UserDashboard/VenuesGrid.jsx
-import { Trophy, MapPin, Users, Bookmark } from "lucide-react";
+import { Trophy, MapPin, Users, Bookmark ,Star } from "lucide-react";
 import { useState } from "react";
 
 export default function VenuesGrid({
@@ -53,12 +53,12 @@ export default function VenuesGrid({
                 </div>
 
                 {/* Popular Tag (top-right, softer yellow) */}
-                <div
+                {/* <div
                   className="absolute top-2 right-2 px-2 py-0.5 text-[11px] font-medium flex items-center gap-1 
-                    bg-yellow-300/90 text-gray-900 shadow-sm"
+    bg-yellow-300/90 text-gray-900 shadow-sm"
                 >
-                  <Trophy size={12} /> Popular
-                </div>
+                  <Star size={12} />
+                </div> */}
               </div>
 
               {/* Card Content */}

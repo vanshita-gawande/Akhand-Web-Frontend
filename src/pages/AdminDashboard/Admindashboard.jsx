@@ -167,6 +167,9 @@ export default function AdminDashboard() {
       capacity: venue.capacity ?? "",
       date: isoDate,
       time: venue.time || "",
+      price: venue.price || 0, // ✅ important
+      openingTime: venue.openingTime || "", // ✅ include opening
+      closingTime: venue.closingTime || "", // ✅ include closing
     });
     setShowModal(true);
   };

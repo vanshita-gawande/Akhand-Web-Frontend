@@ -165,7 +165,7 @@ export default function BookingHistoryModal({
 
                       <div className="mt-3 flex items-center justify-between">
                         <div className="px-3 py-2 bg-green-100 text-green-800 font-semibold rounded">
-                          Total Price: ₹{totalPrice}
+                           Price Paid: ₹{totalPrice}
                         </div>
 
                         {status === "booked" && (

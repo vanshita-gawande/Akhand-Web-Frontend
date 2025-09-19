@@ -55,12 +55,37 @@ export default function UserDashboard() {
   const [bookings, setBookings] = useState([]);
   const [bookingToCancel, setBookingToCancel] = useState(null);
   const [showCancelPopup, setShowCancelPopup] = useState(false);
+   const [userId, setUserId] = useState(null);
 
   // Functions like handleBookingSubmit, scrollToGames are event handlers.They are passed down as props to child components to trigger actions in the parent.
+  // change 1
+  // useEffect(() => {
+  //   const storedUsername = localStorage.getItem("username");
+  //   const storedEmail = localStorage.getItem("email");
+  //   const storedProfilePic = localStorage.getItem("profilePicture");
+  //   if (storedUsername) setUsername(storedUsername);
+  //   if (storedEmail) setEmail(storedEmail);
+  //   if (storedProfilePic) setProfilePicture(storedProfilePic);
+
+  //   fetchVenues();
+  // }, []);
+
   useEffect(() => {
+    // ✅ Get the full user object if available
+    const userString = localStorage.getItem("user");
+    let storedUserId = null;
+
+    if (userString) {
+      const userData = JSON.parse(userString);
+      storedUserId = userData._id; // ✅ Extract _id for backend
+      if (storedUserId) setUserId(storedUserId);
+    }
+
+    // ✅ Continue using your existing working logic
     const storedUsername = localStorage.getItem("username");
     const storedEmail = localStorage.getItem("email");
     const storedProfilePic = localStorage.getItem("profilePicture");
+
     if (storedUsername) setUsername(storedUsername);
     if (storedEmail) setEmail(storedEmail);
     if (storedProfilePic) setProfilePicture(storedProfilePic);
@@ -68,6 +93,8 @@ export default function UserDashboard() {
     fetchVenues();
   }, []);
 
+
+  //fine
   const fetchVenues = async () => {
     try {
       const data = await getVenues();
@@ -85,6 +112,7 @@ export default function UserDashboard() {
     }
   };
 
+  // 
   const handleLogout = () => {
     localStorage.clear();
     window.location.href = "/";
@@ -222,17 +250,39 @@ export default function UserDashboard() {
         />
       )}
 
-      {modalOpen && selectedVenue && (
+      {/* {modalOpen && selectedVenue && (
         <BookingModal
           selectedVenue={selectedVenue}
           bookingForm={bookingForm}
           handleBookingChange={handleBookingChange}
           handleBookingSubmit={handleBookingSubmit}
           username={username}
+          userId={userId} // ✅ pass userId here
           setModalOpen={setModalOpen}
           setSelectedVenue={setSelectedVenue}
         />
+
+      )} */}
+      {modalOpen && selectedVenue && (
+        <BookingModal
+          selectedVenue={selectedVenue}
+          bookingForm={bookingForm}
+          handleBookingChange={handleBookingChange}
+          username={username}
+          userId={userId} // ✅ pass userId here
+          setModalOpen={setModalOpen}
+          setSelectedVenue={setSelectedVenue}
+          onBookingSuccess={() => {
+            setBookingStatus("success"); // show success popup
+            setShowBookingPopup(true);
+          }}
+          onBookingError={() => {
+            setBookingStatus("error"); // show error popup
+            setShowBookingPopup(true);
+          }}
+        />
       )}
+
       {showBookingHistory && (
         <BookingHistoryModal
           bookings={bookings}
