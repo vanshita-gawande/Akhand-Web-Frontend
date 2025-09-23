@@ -12,7 +12,6 @@ export default function Header({
         {/* Logo */}
         <img src={logo} alt="Logo" className="h-30 w-30" />
 
-
         {/* Right Section */}
         <div className="flex items-center gap-4">
           <button

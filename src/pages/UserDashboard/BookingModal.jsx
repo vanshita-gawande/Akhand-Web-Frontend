@@ -194,12 +194,6 @@ export default function BookingModal({
 
         <form
           onSubmit={handlePayment}
-          // onSubmit={(e) => {
-          //   e.preventDefault(); // prevent default form reload
-          //   handleBookingSubmit(e); // run your existing booking logic
-          //   setModalOpen(false); // close modal
-          //   setSelectedVenue(null); // reset venue
-          // }}
           className="space-y-4"
         >
           {/* Username */}
@@ -257,7 +251,6 @@ export default function BookingModal({
                 }`}
               />
             </div>
-
             {/* Dropdown list - only visible when showTimeDropdown = true */}
             {showTimeDropdown && (
               <div className="absolute mt-1 w-full max-h-28 overflow-y-auto border rounded-md bg-white shadow-lg z-10">
