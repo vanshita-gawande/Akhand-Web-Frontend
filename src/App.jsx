@@ -140,7 +140,8 @@ import { useState } from "react";
 import { Routes, Route, useNavigate } from "react-router-dom";
 import Navbar from "./pages/Dashboard/Navbar";
 import LoginForm from "./components/LoginForm";
-import RegisterForm from "./components/RegisterForm";
+import RegisterForm from "./components/RegisterFolder/RegisterForm";
+
 
 // Pages
 import Dashboard from "./pages/Dashboard/Dashboard";
