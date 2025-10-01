@@ -10,7 +10,6 @@ export default function BookingHistoryModal({
 }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [showAllBookings, setShowAllBookings] = useState(false);
-  const [expandedCards, setExpandedCards] = useState({}); // per-card expand
 
   const getFirst = (...vals) => {
     for (const v of vals)
@@ -119,18 +118,18 @@ export default function BookingHistoryModal({
                 return (
                   <div
                     key={id}
-                    className="p-4 rounded-lg border shadow-sm hover:shadow-md transition bg-gray-50"
+                    className={`p-4 rounded-lg border shadow-sm hover:shadow-md transition bg-gray-50 ${
+                      status === "booked"
+                        ? "border-green-400"
+                        : "border-red-300"
+                    }`}
                   >
                     <h3 className="font-semibold text-lg text-purple-700">
                       {venueName}
                     </h3>
 
-                    {/* Booking details with scroll if long */}
-                    <div
-                      className={`mt-2 grid grid-cols-2 gap-2 text-sm text-gray-600 overflow-auto transition-max-height duration-300 ${
-                        expandedCards[id] ? "max-h-72" : "max-h-24"
-                      }`}
-                    >
+                    {/* Details */}
+                    <div className="mt-2 grid grid-cols-2 gap-2 text-sm text-gray-600">
                       <div>
                         <strong>Sport:</strong> {sport}
                       </div>
@@ -155,34 +154,23 @@ export default function BookingHistoryModal({
                       >
                         <strong>Status:</strong> {status}
                       </div>
-                      <div className="col-span-2 px-3 py-2 bg-green-100 text-green-800 font-semibold rounded">
-                        Price Paid: ₹{totalPrice}
-                      </div>
                     </div>
 
-                    {/* Per-card Show More / Show Less */}
-                    <button
-                      className="text-indigo-600 text-sm font-medium hover:underline mt-2"
-                      onClick={() =>
-                        setExpandedCards((prev) => ({
-                          ...prev,
-                          [id]: !prev[id],
-                        }))
-                      }
-                    >
-                      {expandedCards[id] ? "Show Less" : "Show More"}
-                    </button>
+                    {/* Price Paid */}
+                    <div className="mt-3 px-3 py-2 bg-green-100 text-green-700 text-sm font-semibold rounded text-center w-32">
+                      Price Paid: ₹{totalPrice}
+                    </div>
 
-                    {/* Cancel Booking */}
+                    {/* Cancel Booking below Status */}
                     {status === "booked" && (
                       <button
                         onClick={() => {
                           setBookingToCancel(booking);
                           setShowCancelPopup(true);
                         }}
-                        className="px-3 py-1 text-sm bg-red-500 text-white rounded hover:bg-red-600 transition mt-2"
+                        className="mt-2 px-3 py-2 text-sm bg-red-500 text-white rounded hover:bg-red-600 transition w-24"
                       >
-                        Cancel Booking
+                        Cancel
                       </button>
                     )}
                   </div>
