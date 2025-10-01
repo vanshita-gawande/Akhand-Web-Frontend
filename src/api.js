@@ -32,8 +32,8 @@ export const registerUser = async (userData) => {
 };
 
 // Login API
-export const loginUser = async ({ email, password }) => {
-  const response = await API.post("/auth/login", { email, password }); // these are end points which actually calls  http://localhost:5002/api/venues this address here and backend response with a token and user details
+export const loginUser = async ({ email, password, role }) => {
+  const response = await API.post("/auth/login", { email, password, role }); // these are end points which actually calls  http://localhost:5002/api/venues this address here and backend response with a token and user details
   const token = response.data.token;
 
   // Save token immediately
@@ -83,7 +83,7 @@ export const bookVenue = async (bookingData) => {
 
   return response.data;
 };
- 
+
 //  Get bookings of current user
 export const getUserBookings = async () => {
   const res = await API.get("/bookings/my-bookings");

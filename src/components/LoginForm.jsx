@@ -4,7 +4,7 @@ import { loginUser } from "../api";
 
 export default function LoginForm({ onSuccess, onSwitch, onClose }) {
   const [loading, setLoading] = useState(false);
-  const [values, setValues] = useState({ email: "", password: "" });
+  const [values, setValues] = useState({ email: "", password: "", role: "user" });
   const [errors, setErrors] = useState({});
   const [showPopup, setShowPopup] = useState(false);
   const [userRole, setUserRole] = useState(null);
@@ -29,6 +29,7 @@ export default function LoginForm({ onSuccess, onSwitch, onClose }) {
       const data = await loginUser({
         email: values.email,
         password: values.password,
+        role: values.role, //send role to backend
       });
 
       console.log("✅ Login response:", data); // <-- debug log
@@ -40,8 +41,8 @@ export default function LoginForm({ onSuccess, onSwitch, onClose }) {
       localStorage.setItem("email", data.user?.email || "");
       localStorage.setItem("loginTime", Date.now().toString());
 
-      // ✅ Safely store role
-      setUserRole(data.user?.role || data.role || "user");
+      // ✅ Update userRole based on backend response
+      setUserRole(data.user.role); // <-- use backend role
 
       // ✅ Always trigger popup
       setShowPopup(true);
@@ -72,6 +73,22 @@ export default function LoginForm({ onSuccess, onSwitch, onClose }) {
         </h2>
 
         <form onSubmit={onSubmit} className="space-y-4">
+
+          {/*role selection*/}
+          <div>
+            <label className="block text-gray-700 font-medium mb-1">Role</label>
+            <select
+              value={values.role}
+              onChange={(e) => setValues({ ...values, role: e.target.value })}
+              className="w-full px-2 py-1.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-300 bg-white text-gray-700 appearance-none text-sm"
+            >
+              <option value="user">User</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+
+          {/*role selection*/}
+
           {/* Email */}
           <div>
             <label className="block text-gray-700 font-medium mb-1">
@@ -81,9 +98,8 @@ export default function LoginForm({ onSuccess, onSwitch, onClose }) {
               type="email"
               autoComplete="email"
               placeholder="you@example.com"
-              className={`w-full px-4 py-2.5 rounded-lg border ${
-                errors.email ? "border-red-500" : "border-gray-300"
-              } focus:outline-none focus:ring-2 focus:ring-purple-300 transition`}
+              className={`w-full px-4 py-2.5 rounded-lg border ${errors.email ? "border-red-500" : "border-gray-300"
+                } focus:outline-none focus:ring-2 focus:ring-purple-300 transition`}
               value={values.email}
               onChange={(e) =>
                 setValues((v) => ({ ...v, email: e.target.value }))
@@ -103,9 +119,8 @@ export default function LoginForm({ onSuccess, onSwitch, onClose }) {
               type="password"
               autoComplete="current-password"
               placeholder="••••••••"
-              className={`w-full px-4 py-2.5 rounded-lg border ${
-                errors.password ? "border-red-500" : "border-gray-300"
-              } focus:outline-none focus:ring-2 focus:ring-purple-300 transition`}
+              className={`w-full px-4 py-2.5 rounded-lg border ${errors.password ? "border-red-500" : "border-gray-300"
+                } focus:outline-none focus:ring-2 focus:ring-purple-300 transition`}
               value={values.password}
               onChange={(e) =>
                 setValues((v) => ({ ...v, password: e.target.value }))
