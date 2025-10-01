@@ -1,8 +1,7 @@
 // src/components/Navbar.jsx
 import { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
-import logo from "../../assets/logo.webp"; 
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import logo from "../../assets/logo.webp";
 
 export default function Navbar({ onLoginClick, onRegisterClick }) {
   const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem("token"));
@@ -10,60 +9,46 @@ export default function Navbar({ onLoginClick, onRegisterClick }) {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // for logout automatically
-  // ⏰ check expiry function
+  // 🔹 Auth check in one place
   const checkAuth = () => {
     const token = localStorage.getItem("token");
     const loginTime = localStorage.getItem("loginTime");
 
-    if (!token || !loginTime) {
-      return false;
-    }
+    if (!token || !loginTime) return false;
 
-    const oneHour = 1 * 60 * 1000; // 1 hr in ms
+    const sessionLimit = 60 * 60 * 1000; // 1 hour
     const now = Date.now();
 
-    if (now - parseInt(loginTime, 10) > oneHour) {
-      // expired → clear storage
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
-      localStorage.removeItem("loginTime");
+    if (now - parseInt(loginTime, 10) > sessionLimit) {
+      handleLogout(true); // auto-logout
       return false;
     }
-
     return true;
   };
 
-  // Run on mount + route change
+  // 🔹 Logout handler (manual or auto)
+  const handleLogout = (auto = false) => {
+    ["token", "user", "loginTime"].forEach((key) =>
+      localStorage.removeItem(key)
+    );
+    setIsLoggedIn(false);
+    setShowLogoutPopup(false);
+    if (!auto) navigate("/", { replace: true });
+  };
+
+  // ✅ Run on mount, route change, and every 10s
   useEffect(() => {
     setIsLoggedIn(checkAuth());
+    const interval = setInterval(() => setIsLoggedIn(checkAuth()), 10000);
+    return () => clearInterval(interval);
   }, [location.pathname]);
 
-  // React to storage changes
+  // ✅ React to storage changes (multi-tab sync)
   useEffect(() => {
     const syncAuth = () => setIsLoggedIn(!!localStorage.getItem("token"));
     window.addEventListener("storage", syncAuth);
     return () => window.removeEventListener("storage", syncAuth);
   }, []);
-
-  // Run every 10s → auto logout without refresh
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setIsLoggedIn(checkAuth());
-    }, 10000); // check every 10s
-    return () => clearInterval(interval);
-  }, []);
-
-  const handleLogoutConfirm = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    setIsLoggedIn(false);
-    setShowLogoutPopup(false);
-    localStorage.removeItem("loginTime");
-    navigate("/"); // redirect home
-    // Optional redirect
-    // window.location.href = "/";
-  };
 
   return (
     <>
@@ -74,26 +59,16 @@ export default function Navbar({ onLoginClick, onRegisterClick }) {
 
           {/* Links */}
           <ul className="hidden md:flex space-x-8 text-gray-700 font-medium">
-            <li>
-              <a href="#home" className="hover:text-purple-600">
-                Home
-              </a>
-            </li>
-            <li>
-              <a href="#about" className="hover:text-purple-600">
-                About
-              </a>
-            </li>
-            <li>
-              <a href="#services" className="hover:text-purple-600">
-                Services
-              </a>
-            </li>
-            <li>
-              <a href="#footer" className="hover:text-purple-600">
-                Contact
-              </a>
-            </li>
+            {["Home", "About", "Services", "Contact"].map((item) => (
+              <li key={item}>
+                <a
+                  href={`#${item.toLowerCase()}`}
+                  className="hover:text-purple-600"
+                >
+                  {item}
+                </a>
+              </li>
+            ))}
           </ul>
 
           {/* Auth Buttons */}
@@ -127,12 +102,11 @@ export default function Navbar({ onLoginClick, onRegisterClick }) {
 
       {/* Logout Confirmation Popup */}
       {showLogoutPopup && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center blackdrop-blurr bg-opacity-40 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-opacity-40 backdrop-blur-sm">
           <div className="bg-white p-6 rounded-2xl shadow-lg w-80 text-center">
-            <h2 className="text-xl font-bold text-gray-800 mb-4 text-center">
+            <h2 className="text-xl font-bold text-gray-800 mb-4">
               Are you sure you want to logout?
             </h2>
-
             <div className="flex justify-center gap-4">
               <button
                 onClick={() => setShowLogoutPopup(false)}
@@ -141,7 +115,7 @@ export default function Navbar({ onLoginClick, onRegisterClick }) {
                 Cancel
               </button>
               <button
-                onClick={handleLogoutConfirm} // logout + close
+                onClick={() => handleLogout(false)}
                 className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700"
               >
                 Yes, Logout
@@ -153,4 +127,3 @@ export default function Navbar({ onLoginClick, onRegisterClick }) {
     </>
   );
 }
-

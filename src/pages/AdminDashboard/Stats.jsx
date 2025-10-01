@@ -73,9 +73,16 @@ export default function Stats() {
 
   return (
     <section className="py-10 px-4 bg-gray-50">
-      <h2 className="text-3xl font-bold mb-8 text-center text-gray-800">
-        Overview
-      </h2>
+      {/* Main Heading */}
+      <h1 className="text-4xl font-extrabold mb-4 text-center text-gray-900">
+        Admin Dashboard
+      </h1>
+      {/* Subheading */}
+      <div className="flex justify-center">
+        <h2 className="inline-block bg-indigo-100 text-indigo-700 text-base font-semibold px-5 py-2 rounded-full mb-8 shadow-sm">
+          Overview
+        </h2>
+      </div>
 
       <div className="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {/* Total Users */}

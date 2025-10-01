@@ -1,5 +1,6 @@
+// maintain all routes regarding registartion form and its switches
 import { useNavigate } from "react-router-dom";
-import RegisterForm from "../components/RegisterForm";
+import RegisterForm from "./RegisterForm";
 
 export default function RegisterPage() {
   const navigate = useNavigate();

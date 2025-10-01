@@ -113,5 +113,22 @@ export const getStats = async () => {
 };
 
 
+// ------------------ PAYMENTS ------------------
+
+// 1. Create an order on backend
+export const createOrder = async (amount) => {
+  const { data } = await API.post("/payments/create-order", { amount });
+  return data; // will return {id, amount, currency, ...}
+};
+
+// 2. Verify payment after Razorpay popup success
+export const verifyPayment = async (paymentData, bookingDetails) => {
+  const { data } = await API.post("/payments/verify-payment", {
+    ...paymentData,
+    bookingDetails, // send booking form data
+  });
+  return data; // {status: "success", booking: {...}}
+};
+
 
 export default API;

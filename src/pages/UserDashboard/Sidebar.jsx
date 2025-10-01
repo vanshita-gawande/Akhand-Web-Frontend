@@ -45,7 +45,6 @@ export default function Sidebar({
         >
           <FaTimes className="text-xl" />
         </button>
-
         <div className="flex flex-col items-center mb-6 mt-4 pr-3">
           <div className="relative mb-4">
             <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-indigo-500">
@@ -92,7 +91,6 @@ export default function Sidebar({
                     }
                   }}
                 />
-
                 <button
                   onClick={() => {
                     setProfilePicture(null);
@@ -105,7 +103,6 @@ export default function Sidebar({
               </div>
             )}
           </div>
-
           <h2 className="font-bold text-xl text-gray-800">{username}</h2>
           <p className="text-sm text-gray-500">
             @{username.replace(/\s+/g, "").toLowerCase()}
@@ -115,9 +112,7 @@ export default function Sidebar({
             {email}
           </p>
         </div>
-
         <hr className="my-4" />
-
         <nav className="flex flex-col gap-2">
           <button className="flex items-center text-left p-3 hover:bg-indigo-50 rounded-lg transition-colors duration-300 text-gray-800">
             <FaUserCircle className="mr-3 text-indigo-600" />

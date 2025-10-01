@@ -67,7 +67,7 @@ export default function BookingHistory({ bookings, onClose }) {
 
         {/* Title */}
         <h2 className="text-2xl font-extrabold mb-6 text-center text-indigo-500 tracking-wide">
-          Booking History
+          Admin Booking History
         </h2>
 
         {/* Search Bar */}
