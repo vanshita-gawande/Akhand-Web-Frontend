@@ -32,7 +32,7 @@ export const registerUser = async (userData) => {
 };
 
 // Login API
-export const loginUser = async ({ email, password, role }) => {
+export const loginUser = async ({ email, password, role }) => { //isha-added role field 
   const response = await API.post("/auth/login", { email, password, role }); // these are end points which actually calls  http://localhost:5002/api/venues this address here and backend response with a token and user details
   const token = response.data.token;
 
@@ -90,15 +90,16 @@ export const getUserBookings = async () => {
   return res.data;
 };
 // Cancel a booking by its ID
+// src/api.js
+// Cancel (unassign) a booking by ID
 export const cancelBooking = async (bookingId) => {
   const token = localStorage.getItem("token");
-  const response = await API.delete(`/bookings/${bookingId}`, {
-    headers: {
-      Authorization: `Bearer ${token}`, // send token
-    },
+  const response = await API.patch(`/bookings/cancel/${bookingId}`, {
+    headers: { Authorization: `Bearer ${token}` },
   });
-  return response.data; // backend should return a success message or the deleted booking
+  return response.data;
 };
+
 
 // Get all bookings (admin)
 export const getAdminBookings = async () => {

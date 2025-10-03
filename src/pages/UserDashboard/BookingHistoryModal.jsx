@@ -31,8 +31,8 @@ export default function BookingHistoryModal({
     const slots = Array.isArray(booking.time)
       ? booking.time.length
       : booking.time
-      ? 1
-      : 0;
+        ? 1
+        : 0;
     return pricePerSlot * (slots || 1);
   };
 
@@ -118,11 +118,10 @@ export default function BookingHistoryModal({
                 return (
                   <div
                     key={id}
-                    className={`p-4 rounded-lg border shadow-sm hover:shadow-md transition bg-gray-50 ${
-                      status === "booked"
+                    className={`p-4 rounded-lg border shadow-sm hover:shadow-md transition bg-gray-50 ${status === "booked"
                         ? "border-green-400"
                         : "border-red-300"
-                    }`}
+                      }`}
                   >
                     <h3 className="font-semibold text-lg text-purple-700">
                       {venueName}
@@ -146,11 +145,10 @@ export default function BookingHistoryModal({
                         <strong>Players:</strong> {players}
                       </div>
                       <div
-                        className={`${
-                          status === "booked"
+                        className={`${status === "booked"
                             ? "text-green-600"
                             : "text-red-600"
-                        }`}
+                          }`}
                       >
                         <strong>Status:</strong> {status}
                       </div>
@@ -162,7 +160,7 @@ export default function BookingHistoryModal({
                     </div>
 
                     {/* Cancel Booking below Status */}
-                    {status === "booked" && (
+                    {status === "assigned" && (
                       <button
                         onClick={() => {
                           setBookingToCancel(booking);
