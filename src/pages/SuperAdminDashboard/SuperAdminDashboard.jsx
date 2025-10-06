@@ -1,5 +1,4 @@
 import { useState } from "react";
-import Sidebar from "../../components/Sidebar";
 import Overview from "./Overview";
 import Users from "./CurrentUsers";
 import Admins from "./Admins";
@@ -28,8 +27,7 @@ export default function SuperadminDashboard() {
 
   return (
     <div className="flex min-h-screen bg-gray-100">
-      {/* Sidebar */}
-      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+      
 
       {/* Main Content */}
       <main className="flex-1 p-6">{renderContent()}</main>

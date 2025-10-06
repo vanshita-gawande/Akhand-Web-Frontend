@@ -1,8 +1,8 @@
-// src/components/ProtectedRoute.jsx
 import { Navigate } from "react-router-dom";
 
-const ProtectedRoute = ({ children }) => {
+const ProtectedRoute = ({ children, role }) => {
   const token = localStorage.getItem("token");
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
   const loginTime = localStorage.getItem("loginTime");
   const oneHour = 60 * 60 * 1000; // 1 hour
   const now = Date.now();
@@ -12,10 +12,15 @@ const ProtectedRoute = ({ children }) => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     localStorage.removeItem("loginTime");
-    return <Navigate to="/" replace />; // 👈 redirect to homepage
+    return <Navigate to="/" replace />;
   }
 
-  return children; // if valid → show page
+  // role check
+  if (role && user.role !== role) {
+    return <Navigate to="/" replace />;
+  }
+
+  return children;
 };
 
 export default ProtectedRoute;

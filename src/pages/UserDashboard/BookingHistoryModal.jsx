@@ -10,6 +10,8 @@ export default function BookingHistoryModal({
 }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [showAllBookings, setShowAllBookings] = useState(false);
+  const [statusFilter, setStatusFilter] = useState("all");
+  // "all", "assigned", "unassigned"
 
   const getFirst = (...vals) => {
     for (const v of vals)
@@ -31,15 +33,15 @@ export default function BookingHistoryModal({
     const slots = Array.isArray(booking.time)
       ? booking.time.length
       : booking.time
-        ? 1
-        : 0;
+      ? 1
+      : 0;
     return pricePerSlot * (slots || 1);
   };
 
   const q = searchTerm.trim().toLowerCase();
 
   const filteredBookings = bookings.filter((booking) => {
-    if (!q) return true;
+    // Apply search term filter
     const venueName = getFirst(booking.venueId?.name, booking.name).toString();
     const sport = getFirst(booking.venueId?.sport, booking.sport).toString();
     const location = getFirst(
@@ -47,18 +49,24 @@ export default function BookingHistoryModal({
       booking.location
     ).toString();
     const dateStr = formatDate(booking.date).toString();
-    const status = (booking.status || "").toString();
+    const status = (booking.status || "").toString().toLowerCase();
     const totalStr = String(computeTotalPrice(booking));
-    return (
+
+    const matchesSearch =
+      !q ||
       venueName.toLowerCase().includes(q) ||
       sport.toLowerCase().includes(q) ||
       location.toLowerCase().includes(q) ||
       dateStr.toLowerCase().includes(q) ||
-      status.toLowerCase().includes(q) ||
-      totalStr.toLowerCase().includes(q)
-    );
-  });
+      status.includes(q) ||
+      totalStr.includes(q);
 
+    // Apply status filter
+    const matchesStatus =
+      statusFilter === "all" || status === statusFilter.toLowerCase();
+
+    return matchesSearch && matchesStatus;
+  });
   const visibleBookings = showAllBookings
     ? filteredBookings
     : filteredBookings.slice(0, 3);
@@ -79,15 +87,32 @@ export default function BookingHistoryModal({
           <h2 className="text-2xl font-extrabold mb-0 text-indigo-600 tracking-wide flex items-center gap-2">
             <FaHistory /> Your Booking History
           </h2>
-          <div className="relative mb-0 flex items-center bg-indigo-100 rounded-lg px-3 py-2 w-full max-w-md shadow-sm">
-            <FaSearch className="text-indigo-600 mr-2" />
-            <input
-              type="text"
-              placeholder="Search by venue, sport, date, status or price..."
-              className="flex-1 bg-transparent outline-none text-sm text-indigo-900 placeholder-indigo-500"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
+
+          <div className="flex flex-col md:flex-row gap-3 w-full max-w-2xl">
+            {/* Search Bar */}
+            <div className="relative flex items-center bg-indigo-100 rounded-lg px-3 py-2 flex-1 shadow-sm">
+              <FaSearch className="text-indigo-600 mr-2" />
+              <input
+                type="text"
+                placeholder="Search by venue, sport, date, status or price..."
+                className="flex-1 bg-transparent outline-none text-sm text-indigo-900 placeholder-indigo-500"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+
+            {/* Status Filter */}
+            <div className="flex items-center bg-indigo-100 rounded-lg px-3 py-2 shadow-sm">
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="bg-transparent outline-none text-sm text-indigo-900 cursor-pointer"
+              >
+                <option value="all">All Bookings</option>
+                <option value="assigned">Assigned</option>
+                <option value="unassigned">Unassigned</option>
+              </select>
+            </div>
           </div>
         </div>
 
@@ -118,10 +143,11 @@ export default function BookingHistoryModal({
                 return (
                   <div
                     key={id}
-                    className={`p-4 rounded-lg border shadow-sm hover:shadow-md transition bg-gray-50 ${status === "booked"
+                    className={`p-4 rounded-lg border shadow-sm hover:shadow-md transition bg-gray-50 ${
+                      status === "booked"
                         ? "border-green-400"
                         : "border-red-300"
-                      }`}
+                    }`}
                   >
                     <h3 className="font-semibold text-lg text-purple-700">
                       {venueName}
@@ -130,6 +156,7 @@ export default function BookingHistoryModal({
                     {/* Details */}
                     <div className="mt-2 grid grid-cols-2 gap-2 text-sm text-gray-600">
                       <div>
+                        {/* assigned here from placeholder for search items {} in this */}
                         <strong>Sport:</strong> {sport}
                       </div>
                       <div>
@@ -145,10 +172,11 @@ export default function BookingHistoryModal({
                         <strong>Players:</strong> {players}
                       </div>
                       <div
-                        className={`${status === "booked"
+                        className={`${
+                          status === "booked"
                             ? "text-green-600"
                             : "text-red-600"
-                          }`}
+                        }`}
                       >
                         <strong>Status:</strong> {status}
                       </div>

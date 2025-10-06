@@ -4,10 +4,14 @@ import { loginUser } from "../api";
 
 export default function LoginForm({ onSuccess, onSwitch, onClose }) {
   const [loading, setLoading] = useState(false);
-  const [values, setValues] = useState({ email: "", password: "", role: "user" });
+  const [values, setValues] = useState({
+    email: "",
+    password: "",
+    role: "user",
+  });
   const [errors, setErrors] = useState({});
   const [showPopup, setShowPopup] = useState(false);
-  const [userRole, setUserRole] = useState(null);
+  const [redirectRole, setRedirectRole] = useState(null);
   const navigate = useNavigate();
 
   function validate() {
@@ -29,10 +33,10 @@ export default function LoginForm({ onSuccess, onSwitch, onClose }) {
       const data = await loginUser({
         email: values.email,
         password: values.password,
-        role: values.role, //send role to backend
+        role: values.role,
       });
 
-      console.log("✅ Login response:", data); // <-- debug log
+      console.log("✅ Login response:", data);
 
       // Save token and user info
       localStorage.setItem("token", data.token);
@@ -41,10 +45,10 @@ export default function LoginForm({ onSuccess, onSwitch, onClose }) {
       localStorage.setItem("email", data.user?.email || "");
       localStorage.setItem("loginTime", Date.now().toString());
 
-      // ✅ Update userRole based on backend response
-      setUserRole(data.user.role); // <-- use backend role
+      // Save role to redirect after popup
+      setRedirectRole(data.user.role);
 
-      // ✅ Always trigger popup
+      // Show success popup
       setShowPopup(true);
     } catch (err) {
       setErrors((prev) => ({
@@ -55,6 +59,14 @@ export default function LoginForm({ onSuccess, onSwitch, onClose }) {
       setLoading(false);
     }
   }
+
+  const handleContinue = () => {
+    setShowPopup(false);
+    onSuccess?.();
+    if (redirectRole === "superadmin") navigate("/superadmin/dashboard");
+    else if (redirectRole === "admin") navigate("/admindashboard");
+    else navigate("/userdashboard");
+  };
 
   return (
     <>
@@ -73,8 +85,7 @@ export default function LoginForm({ onSuccess, onSwitch, onClose }) {
         </h2>
 
         <form onSubmit={onSubmit} className="space-y-4">
-
-          {/*role selection*/}
+          {/* Role selection */}
           <div>
             <label className="block text-gray-700 font-medium mb-1">Role</label>
             <select
@@ -87,8 +98,6 @@ export default function LoginForm({ onSuccess, onSwitch, onClose }) {
             </select>
           </div>
 
-          {/*role selection*/}
-
           {/* Email */}
           <div>
             <label className="block text-gray-700 font-medium mb-1">
@@ -98,8 +107,9 @@ export default function LoginForm({ onSuccess, onSwitch, onClose }) {
               type="email"
               autoComplete="email"
               placeholder="you@example.com"
-              className={`w-full px-4 py-2.5 rounded-lg border ${errors.email ? "border-red-500" : "border-gray-300"
-                } focus:outline-none focus:ring-2 focus:ring-purple-300 transition`}
+              className={`w-full px-4 py-2.5 rounded-lg border ${
+                errors.email ? "border-red-500" : "border-gray-300"
+              } focus:outline-none focus:ring-2 focus:ring-purple-300 transition`}
               value={values.email}
               onChange={(e) =>
                 setValues((v) => ({ ...v, email: e.target.value }))
@@ -119,8 +129,9 @@ export default function LoginForm({ onSuccess, onSwitch, onClose }) {
               type="password"
               autoComplete="current-password"
               placeholder="••••••••"
-              className={`w-full px-4 py-2.5 rounded-lg border ${errors.password ? "border-red-500" : "border-gray-300"
-                } focus:outline-none focus:ring-2 focus:ring-purple-300 transition`}
+              className={`w-full px-4 py-2.5 rounded-lg border ${
+                errors.password ? "border-red-500" : "border-gray-300"
+              } focus:outline-none focus:ring-2 focus:ring-purple-300 transition`}
               value={values.password}
               onChange={(e) =>
                 setValues((v) => ({ ...v, password: e.target.value }))
@@ -163,7 +174,7 @@ export default function LoginForm({ onSuccess, onSwitch, onClose }) {
         </p>
       </div>
 
-      {/* ✅ Success Popup */}
+      {/* Success Popup */}
       {showPopup && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-[9999]">
           <div className="bg-white p-6 rounded-xl shadow-lg text-center max-w-sm w-full">
@@ -172,16 +183,7 @@ export default function LoginForm({ onSuccess, onSwitch, onClose }) {
             </h3>
             <p className="text-gray-700 mb-4">Welcome back!</p>
             <button
-              onClick={() => {
-                setShowPopup(false);
-                onSuccess?.();
-                // ✅ Redirect after popup dismiss
-                if (userRole === "admin") {
-                  navigate("/admindashboard");
-                } else {
-                  navigate("/userdashboard");
-                }
-              }}
+              onClick={handleContinue}
               className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition"
             >
               Continue

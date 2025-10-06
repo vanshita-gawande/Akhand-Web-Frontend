@@ -213,6 +213,7 @@ export default function BookingModal({
                 onChange={handleBookingChange}
                 className="w-full px-3 py-2 border rounded-md"
                 required
+                min={new Date().toISOString().split("T")[0]} // only today & future dates
               />
             </div>
 

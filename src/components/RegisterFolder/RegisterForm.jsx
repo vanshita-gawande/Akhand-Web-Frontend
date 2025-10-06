@@ -199,39 +199,60 @@ export default function RegisterForm({ onSuccess, onSwitch, onClose }) {
           Create Account
         </h2>
 
-        <form onSubmit={handleSubmit} className="space-y-2.5">
+        <form
+          onSubmit={handleSubmit}
+          className="grid grid-cols-1 md:grid-cols-2 gap-5 p-6 rounded-2xl 
+             bg-gradient-to-br"
+        >
           {/* Role Selector */}
-          <div>
-            <label className="block text-gray-700 font-medium mb-1">Role</label>
+          <div className="md:col-span-2">
+            <label className="block text-sm font-semibold text-purple-700 mb-1">
+              Role
+            </label>
             <select
               value={values.role}
               onChange={(e) => setValues({ ...values, role: e.target.value })}
-              className="w-full px-2 py-1.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-300 bg-white text-gray-700 appearance-none text-sm"
+              className="w-full px-3 py-2.5 rounded-lg border border-purple-300 text-gray-700 text-sm
+                 focus:outline-none focus:ring-2 focus:ring-purple-400
+                 bg-gradient-to-r from-purple-100 via-purple-50 to-purple-100"
             >
               <option value="user">User</option>
               <option value="admin">Admin</option>
             </select>
           </div>
 
+          {/* Personal Name */}
           <PersonalName
             values={values}
             errors={errors}
             handleChange={handleChange}
-            inputClass="py-1.5 text-sm"
+            inputClass="w-full px-3 py-2.5 rounded-lg border border-purple-300 text-gray-700 text-sm
+                focus:outline-none focus:ring-2 focus:ring-purple-400
+                bg-gradient-to-r from-purple-100 via-purple-50 to-purple-100"
           />
+
+          {/* Email */}
           <EmailField
             values={values}
             errors={errors}
             handleChange={handleChange}
-            inputClass="py-1.5 text-sm"
+            inputClass="w-full px-3 py-2.5 rounded-lg border border-purple-300 text-gray-700 text-sm
+                focus:outline-none focus:ring-2 focus:ring-purple-400
+                bg-gradient-to-r from-purple-100 via-purple-50 to-purple-100"
           />
+
+          {/* Phone */}
           <PhoneField
             values={values}
             errors={errors}
             onMobileChange={handleMobileChange}
             phoneRules={phoneRules}
-            inputClass="py-1.5 text-sm"
+            inputClass="w-full px-3 py-2.5 rounded-lg border border-purple-300 text-gray-700 text-sm
+                focus:outline-none focus:ring-2 focus:ring-purple-400
+                bg-gradient-to-r from-purple-100 via-purple-50 to-purple-100"
           />
+
+          {/* Passwords */}
           <PasswordFields
             values={values}
             errors={errors}
@@ -243,14 +264,19 @@ export default function RegisterForm({ onSuccess, onSwitch, onClose }) {
             setShowPassword={setShowPassword}
             showConfirmPassword={showConfirmPassword}
             setShowConfirmPassword={setShowConfirmPassword}
-            inputClass="py-1.5 text-sm"
+            inputClass="w-full px-3 py-2.5 rounded-lg border border-purple-300 text-gray-700 text-sm
+                focus:outline-none focus:ring-2 focus:ring-purple-400
+                bg-gradient-to-r from-purple-100 via-purple-50 to-purple-100"
           />
 
-          <div className="flex justify-center">
+          {/* Submit Button */}
+          <div className="md:col-span-2 flex justify-center mt-4">
             <button
               type="submit"
               disabled={loading}
-              className="w-36 py-1.5 bg-purple-600 text-white font-semibold rounded-lg hover:bg-purple-700 transition disabled:opacity-50 text-sm"
+              className="w-44 py-2.5 font-bold rounded-lg shadow-md text-white text-sm
+                 bg-gradient-to-r from-purple-500 to-purple-700
+                 hover:from-purple-600 hover:to-purple-800 transition disabled:opacity-50"
             >
               {loading ? "Creating..." : "Create Account"}
             </button>

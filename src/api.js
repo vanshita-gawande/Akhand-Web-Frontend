@@ -1,6 +1,6 @@
 import axios from "axios";
 
-// ✅ Base axios instance , here we set the base URL for all requests i.e the app always knows the home addess and then instead of writing the whole address everytime we write only the endpoint
+// ✅ Base axios instance
 const API = axios.create({
   baseURL: "http://localhost:5002/api",
   headers: {
@@ -8,7 +8,7 @@ const API = axios.create({
   },
 });
 
-// ✅ Attach token automatically to all requests , This is an axios interceptor → it runs before every request. It fetches the token from localStorage and adds it to the Authorization header if it exists and hence no need to add token manually.
+// ✅ Attach token automatically to all requests
 API.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
   if (token) {
@@ -17,49 +17,46 @@ API.interceptors.request.use((config) => {
   return config;
 });
 
-// ------------------ AUTH APIs------------------
+// ------------------ AUTH APIs ------------------
 
-// Get current user
-export const getMe = async () => {
-  const res = await API.get("/auth/me"); //Calls GET /auth/me -> backend uses the token to find the logged-in user.
-  return res.data; // and returns { user: {...} }
+// Get current user (explicit token support)
+export const getMe = async (token) => {
+  const res = await API.get("/auth/me", {
+    headers: token ? { Authorization: `Bearer ${token}` } : undefined, // fallback if no token
+  });
+  return res.data; // returns { user: {...} }
 };
 
 // Register API
 export const registerUser = async (userData) => {
-  const response = await API.post("/auth/register", userData); // Calls POST /auth/register with user details (name, email, password, etc).Backend creates a new user.
+  const response = await API.post("/auth/register", userData);
   return response.data;
 };
 
 // Login API
-export const loginUser = async ({ email, password, role }) => { //isha-added role field 
-  const response = await API.post("/auth/login", { email, password, role }); // these are end points which actually calls  http://localhost:5002/api/venues this address here and backend response with a token and user details
+export const loginUser = async ({ email, password, role}) => {
+  const response = await API.post("/auth/login", { email, password, role });
   const token = response.data.token;
 
   // Save token immediately
   localStorage.setItem("token", token);
 
   // Fetch profile so UI can show user info
-  const me = await getMe();
+  const me = await getMe(); // ✅ explicitly pass token
   return { token, user: me.user };
 };
 
 // ------------------ VENUES ------------------
-
-// this is for admin
-// Get all venues ,Calls GET /venues and Returns an array of venues (from your database).
 export const getVenues = async () => {
   const response = await API.get("/venues");
   return response.data;
 };
 
-// Add new venue ,Calls POST /venues/register with venue details (name, location, sport, etc).Backend adds venue to DB.
 export const addVenue = async (venueData) => {
   const response = await API.post("/venues/register", venueData);
   return response.data;
 };
 
-//  New for update and delete
 export const updateVenue = async (id, venue) => {
   const { data } = await API.put(`/venues/${id}`, venue);
   return data;
@@ -71,27 +68,19 @@ export const deleteVenue = async (id) => {
 };
 
 // ------------------ BOOKINGS ------------------
-//Book a venue by logged-in user
 export const bookVenue = async (bookingData) => {
-  const token = localStorage.getItem("token"); // stored after login
-
+  const token = localStorage.getItem("token");
   const response = await API.post("/bookings", bookingData, {
-    headers: {
-      Authorization: `Bearer ${token}` // ✅ send token
-    }
+    headers: { Authorization: `Bearer ${token}` },
   });
-
   return response.data;
 };
 
-//  Get bookings of current user
 export const getUserBookings = async () => {
   const res = await API.get("/bookings/my-bookings");
   return res.data;
 };
-// Cancel a booking by its ID
-// src/api.js
-// Cancel (unassign) a booking by ID
+
 export const cancelBooking = async (bookingId) => {
   const token = localStorage.getItem("token");
   const response = await API.patch(`/bookings/cancel/${bookingId}`, {
@@ -100,10 +89,8 @@ export const cancelBooking = async (bookingId) => {
   return response.data;
 };
 
-
-// Get all bookings (admin)
 export const getAdminBookings = async () => {
-  const res = await API.get("/bookings/all-bookings"); // ✅ correct path
+  const res = await API.get("/bookings/all-bookings");
   return res.data;
 };
 
@@ -113,23 +100,18 @@ export const getStats = async () => {
   return data;
 };
 
-
 // ------------------ PAYMENTS ------------------
-
-// 1. Create an order on backend
 export const createOrder = async (amount) => {
   const { data } = await API.post("/payments/create-order", { amount });
-  return data; // will return {id, amount, currency, ...}
+  return data;
 };
 
-// 2. Verify payment after Razorpay popup success
 export const verifyPayment = async (paymentData, bookingDetails) => {
   const { data } = await API.post("/payments/verify-payment", {
     ...paymentData,
-    bookingDetails, // send booking form data
+    bookingDetails,
   });
-  return data; // {status: "success", booking: {...}}
+  return data;
 };
-
 
 export default API;
