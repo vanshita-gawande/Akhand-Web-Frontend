@@ -8,28 +8,47 @@ import Settings from "./Settings";
 export default function SuperadminDashboard() {
   const [activeTab, setActiveTab] = useState("overview");
 
+  const tabs = [
+    { id: "overview", label: "Overview" },
+    { id: "users", label: "Users" },
+    { id: "admins", label: "Admins" },
+    { id: "logs", label: "Logs" },
+    { id: "settings", label: "Settings" },
+  ];
+
   const renderContent = () => {
     switch (activeTab) {
-      case "overview":
-        return <Overview />;
-      case "users":
-        return <Users />;
-      case "admins":
-        return <Admins />;
-      case "logs":
-        return <Logs />;
-      case "settings":
-        return <Settings />;
-      default:
-        return <Overview />;
+      case "overview": return <Overview />;
+      case "users": return <Users />;
+      case "admins": return <Admins />;
+      case "logs": return <Logs />;
+      case "settings": return <Settings />;
+      default: return <Overview />;
     }
   };
 
   return (
     <div className="flex min-h-screen bg-gray-100">
-      
+      {/* Sidebar */}
+      <aside className="w-64 bg-white border-r p-6 space-y-4">
+        <h2 className="text-xl font-bold text-gray-700 mb-6">Super Admin</h2>
+        <nav className="space-y-2">
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`block w-full text-left px-4 py-2 rounded-lg font-medium ${activeTab === tab.id
+                ? "bg-blue-500 text-white"
+                : "text-gray-700 hover:bg-gray-200"
+                }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </nav>
+      </aside>
 
-      {/* Main Content */}
+      {/* Main content */}
       <main className="flex-1 p-6">{renderContent()}</main>
     </div>
   );

@@ -34,7 +34,7 @@ export const registerUser = async (userData) => {
 };
 
 // Login API
-export const loginUser = async ({ email, password, role}) => {
+export const loginUser = async ({ email, password, role }) => {
   const response = await API.post("/auth/login", { email, password, role });
   const token = response.data.token;
 
@@ -112,6 +112,44 @@ export const verifyPayment = async (paymentData, bookingDetails) => {
     bookingDetails,
   });
   return data;
+};
+
+//----------------------------------------SUPERADMIN---------------------------------------
+// ------------------ SUPER ADMIN ------------------
+export const getSuperAdminOverview = async () => {
+  const { data } = await API.get("/superadmin/overview");
+  return data;
+};
+
+export const getAllAdmins = async () => {
+  const { data } = await API.get("/superadmin/admins");
+  return data;
+};
+
+export const createAdmin = async (adminData) => {
+  const { data } = await API.post("/superadmin/admins", adminData);
+  return data;
+};
+
+export const deleteAdmin = async (id) => {
+  const { data } = await API.delete(`/superadmin/admins/${id}`);
+  return data;
+};
+
+export const getAllUsers = async () => {
+  const { data } = await API.get("/superadmin/users");
+  return data;
+};
+
+export const deleteUser = async (id) => {
+  const { data } = await API.delete(`/superadmin/users/${id}`);
+  return data;
+};
+
+//----------------------EMAIL--------------
+export const sendEmail = async (emailData) => {
+  const response = await API.post("/email/send", emailData);
+  return response.data;
 };
 
 export default API;
