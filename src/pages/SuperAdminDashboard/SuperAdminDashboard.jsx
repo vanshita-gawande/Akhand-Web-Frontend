@@ -31,6 +31,33 @@ export default function SuperadminDashboard() {
     setShowLogout(false);
   };
 
+  // ✅ Tabs configuration
+  const tabs = [
+    { id: "overview", label: "Overview" },
+    { id: "users", label: "Users" },
+    { id: "admins", label: "Admins" },
+    { id: "logs", label: "Logs" },
+    { id: "settings", label: "Settings" },
+  ];
+
+  // ✅ Render content dynamically
+  const renderContent = () => {
+    switch (activeTab) {
+      case "overview":
+        return <Overview />;
+      case "users":
+        return <Users />;
+      case "admins":
+        return <Admins />;
+      case "logs":
+        return <Logs />;
+      case "settings":
+        return <Settings />;
+      default:
+        return <Overview />;
+    }
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-gray-100">
       {/* ✅ Navbar */}
@@ -39,34 +66,29 @@ export default function SuperadminDashboard() {
       {/* ✅ Layout */}
       <div className="flex flex-1">
         {/* Sidebar */}
-        <aside className="w-64 bg-white shadow-md p-4">
-          <h2 className="font-bold text-lg mb-4">Super Admin Menu</h2>
-          <ul>
-            {["overview", "users", "admins", "logs", "settings"].map((tab) => (
-              <li key={tab} className="mb-2">
-                <button
-                  className={`w-full text-left p-2 rounded transition ${
-                    activeTab === tab
-                      ? "bg-purple-600 text-white"
-                      : "text-gray-700 hover:bg-purple-50"
-                  }`}
-                  onClick={() => setActiveTab(tab)}
-                >
-                  {tab.charAt(0).toUpperCase() + tab.slice(1)}
-                </button>
-              </li>
+        <aside className="w-64 bg-white shadow-md p-6 space-y-4">
+          <h2 className="text-xl font-bold text-gray-700 mb-4">
+            Super Admin Menu
+          </h2>
+          <nav className="space-y-2">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`block w-full text-left px-4 py-2 rounded-lg font-medium transition ${
+                  activeTab === tab.id
+                    ? "bg-purple-600 text-white"
+                    : "text-gray-700 hover:bg-purple-50"
+                }`}
+              >
+                {tab.label}
+              </button>
             ))}
-          </ul>
+          </nav>
         </aside>
 
-        {/* ✅ Main content */}
-        <main className="flex-1 p-6 overflow-auto">
-          {activeTab === "overview" && <Overview />}
-          {activeTab === "users" && <Users />}
-          {activeTab === "admins" && <Admins />}
-          {activeTab === "logs" && <Logs />}
-          {activeTab === "settings" && <Settings />}
-        </main>
+        {/* ✅ Main Content */}
+        <main className="flex-1 p-6 overflow-auto">{renderContent()}</main>
       </div>
 
       {/* ✅ Logout Popup */}
