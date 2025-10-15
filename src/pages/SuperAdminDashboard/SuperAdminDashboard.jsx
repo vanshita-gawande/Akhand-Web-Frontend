@@ -16,6 +16,22 @@ export default function SuperadminDashboard() {
     { id: "settings", label: "Settings" },
   ];
 
+  const handleLogout = async () => {
+    try {
+      // Call backend API to logout
+      await fetch("/api/logout", { method: "POST", credentials: "include" });
+
+      // Clear any tokens stored locally (if using JWT)
+      localStorage.removeItem("token");
+      sessionStorage.removeItem("token");
+
+      // Redirect to home page
+      window.location.href = "/";
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
+
   const renderContent = () => {
     switch (activeTab) {
       case "overview": return <Overview />;
@@ -46,6 +62,15 @@ export default function SuperadminDashboard() {
             </button>
           ))}
         </nav>
+
+        {/* Logout button */}
+        <button
+          onClick={handleLogout}
+          className="block w-full mt-6 text-left px-4 py-2 rounded-lg font-medium bg-red-500 text-white hover:bg-red-600"
+        >
+          Logout
+        </button>
+
       </aside>
 
       {/* Main content */}
