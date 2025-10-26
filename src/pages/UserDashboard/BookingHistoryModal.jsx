@@ -186,6 +186,18 @@ export default function BookingHistoryModal({
                     <div className="mt-3 px-3 py-2 bg-green-100 text-green-700 text-sm font-semibold rounded text-center w-32">
                       Price Paid: ₹{totalPrice}
                     </div>
+                    {booking.qrCode && (
+                      <div className="flex flex-col items-center">
+                        <img
+                          src={booking.qrCode}
+                          alt="QR Code"
+                          className="w-28 h-28 border p-1 rounded bg-white shadow"
+                        />
+                        <span className="text-xs text-gray-500 mt-1">
+                          Scan QR
+                        </span>
+                      </div>
+                    )}
 
                     {/* Cancel Booking below Status */}
                     {status === "assigned" && (
