@@ -251,7 +251,7 @@ export default function UserDashboard() {
       {/* BookingPage Route */}
       <Routes>
         <Route path="/dashboard" element={<UserDashboard />} />
-        <Route path="booking/:id" element={<BookingPage />} />
+        {/* <Route path="booking/:id" element={<BookingPage />} /> */}
       </Routes>
     </div>
   );

@@ -10,6 +10,8 @@ import UserDashboard from "./pages/UserDashboard/UserDashboard";
 import AdminDashboard from "./pages/AdminDashboard/Admindashboard";
 import SuperAdminDashboard from "./pages/SuperAdminDashboard/SuperAdminDashboard";
 
+import BookingPage from "./pages/UserDashboard/BookingPage";
+
 // Common Footer
 import Footer from "./CommonFiles/Footer";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -78,7 +80,9 @@ export default function AppContent() {
             />
           }
         />
-
+        {/* ✅ Add this new route here */}
+        <Route path="/booking/:id" element={<BookingPage />} />
+        
         {/* User Dashboard */}
         <Route
           path="/userdashboard"

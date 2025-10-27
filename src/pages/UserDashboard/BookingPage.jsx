@@ -11,7 +11,7 @@ export default function BookingPage() {
   useEffect(() => {
     axios
       .get(`http://localhost:5002/api/bookings/${id}`)
-      .then((res) => setBooking(res.data))
+      .then((res) => setBooking(res.data.booking || res.data))
       .catch((err) => console.error(err))
       .finally(() => setLoading(false));
   }, [id]);
@@ -40,13 +40,23 @@ export default function BookingPage() {
           <strong>Date:</strong> {new Date(booking.date).toLocaleDateString()}
         </p>
         <p>
-          <strong>Time:</strong> {booking.time.join(", ")}
+          <p>
+            <strong>Time:</strong>{" "}
+            {Array.isArray(booking.time)
+              ? booking.time.join(", ")
+              : booking.time}
+          </p>
         </p>
         <p>
           <strong>Players:</strong> {booking.players}
         </p>
         <p>
-          <strong>Price Paid:</strong> ₹{booking.price}
+          <p>
+            <strong>Time:</strong>{" "}
+            {Array.isArray(booking.time)
+              ? booking.time.join(", ")
+              : booking.time}
+          </p>
         </p>
       </div>
 
