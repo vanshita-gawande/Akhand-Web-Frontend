@@ -103,7 +103,6 @@ export default function VenuesGrid({
           ))}
         </div>
       )}
-
       {/* Read More Modal */}
       {selectedVenue && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
@@ -114,13 +113,11 @@ export default function VenuesGrid({
             >
               ✕
             </button>
-
             <img
               src={selectedVenue.image || "/images/default-venue.jpg"}
               alt={selectedVenue.name}
               className="w-full h-60 object-cover mb-6 border-b-4 border-indigo-600"
             />
-
             <h3 className="text-3xl font-extrabold text-indigo-700 mb-4 uppercase tracking-wide">
               {selectedVenue.name}
             </h3>
@@ -128,7 +125,6 @@ export default function VenuesGrid({
               {selectedVenue.description ||
                 "This venue offers excellent facilities, modern amenities, and a great environment for sports and gatherings."}
             </p>
-
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-gray-700 text-sm">
               <p className="flex items-center gap-2 bg-gray-100 px-3 py-2">
                 <MapPin size={16} className="text-red-500" />{" "}

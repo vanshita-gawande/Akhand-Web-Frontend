@@ -10,7 +10,7 @@ export default function BookingPage() {
 
   useEffect(() => {
     axios
-      .get(`http://localhost:5002/api/bookings/${id}`)
+      .get(`http://localhost:5173/api/bookings/${id}`)
       .then((res) => setBooking(res.data.booking || res.data))
       .catch((err) => console.error(err))
       .finally(() => setLoading(false));
