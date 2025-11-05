@@ -1,8 +1,8 @@
 // RegisterForm.jsx
-import { useState } from "react";
-import { parsePhoneNumberFromString } from "libphonenumber-js";
-import validator from "validator";
-import { registerUser } from "../../api";
+import { useState } from "react"; // hook let u store value that can chnage overtime for ex form inputs
+import { parsePhoneNumberFromString } from "libphonenumber-js"; //comes from libraray that format,valisate phone numbers nad extract national  numbers and country code
+import validator from "validator"; //genral purpose validation libraray which gives readymade validate function ex .validtaor.isemail(), isurl()etc
+import { registerUser } from "../../api"; //import function to send backend post req
 
 import PersonalName from "./PersonalName";
 import EmailField from "./EmailField";
@@ -29,13 +29,14 @@ export default function RegisterForm({ onSuccess, onSwitch, onClose }) {
     special: true,
     length: true,
   });
-  const [showPasswordSuggestions, setShowPasswordSuggestions] = useState(false);
+  const [showPasswordSuggestions, setShowPasswordSuggestions] = useState(false); //used to show which pass field failed
   const [dialCode, setDialCode] = useState("91");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [showPopup, setShowPopup] = useState(false);
-  const [registrationSuccess, setRegistrationSuccess] = useState(false);
-
+  const [showPopup, setShowPopup] = useState(false); // hide/show buttons
+  const [registrationSuccess, setRegistrationSuccess] = useState(false); //controls popup ui
+  const phoneRules = { IN: 10, US: 10, GB: 10, AE: 9 };
+  //pass checker ,update ui rules instantly that rule goes as we type correct pass , return boolean
   const checkPassword = (password) => {
     const rules = {
       capital: !/[A-Z]/.test(password),
@@ -47,8 +48,7 @@ export default function RegisterForm({ onSuccess, onSwitch, onClose }) {
     return rules;
   };
 
-  const phoneRules = { IN: 10, US: 10, GB: 10, AE: 9 };
-
+  // main validation func validation rules and pass in validate filed to check and render errors when something wrong get typed called everytime when usertyes in any of field
   const validateField = (field, value, allValues = values) => {
     let message = "";
     if (field === "firstName") {
@@ -113,15 +113,16 @@ export default function RegisterForm({ onSuccess, onSwitch, onClose }) {
     return message;
   };
 
+  // genral fun to handle inp This updates values from empty → currently typed value,Triggers re-render
   const handleChange = (field, value) => {
     if (field === "mobile") value = value.replace(/\D/g, "");
     if (field === "name") value = value.replace(/[^A-Za-z]/g, "");
-    const updatedValues = { ...values, [field]: value };
-    setValues(updatedValues);
-    const errorMsg = validateField(field, value, updatedValues);
+    const updatedValues = { ...values, [field]: value }; // whenver user types values udate fro here
+    setValues(updatedValues); //merge and update values and trigger react to rerender
+    const errorMsg = validateField(field, value, updatedValues); // everythig valiadte here each filed from form , filed here determine which validation rule to run , value -> the current typed text , updatedvalue -> needed for cross field validation like confirm password , everytime it return something which need to be store so the new value store here on basis of it gives the msg to show in ui
     setErrors((prev) => ({ ...prev, [field]: errorMsg }));
   };
-
+  // Gets a (phone, country) object from react-phone-input-2
   const handleMobileChange = (phone, country) => {
     const formatted = phone.startsWith("+") ? phone : `+${phone}`;
     const countryCode = country?.countryCode || "in";
@@ -142,15 +143,16 @@ export default function RegisterForm({ onSuccess, onSwitch, onClose }) {
     const errorMsg = validateField("mobile", formatted, updatedValues);
     setErrors((prev) => ({ ...prev, mobile: errorMsg }));
   };
-
+  //whenver submit button click react calls this
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    e.preventDefault(); // Stop the browser from doing its built-in form submit behavior (page reload).
     const newErrors = {};
     Object.entries(values).forEach(([field, value]) => {
+      //validate one more time
       newErrors[field] = validateField(field, value, values);
-    });
-    setErrors(newErrors);
-    if (Object.values(newErrors).some((msg) => msg && msg.length > 0)) return;
+    }); // it carries the error message from all filed if fild has no error it will be null , if any error then error message must be in array so if error stop
+    setErrors(newErrors); // shows errors if any
+    if (Object.values(newErrors).some((msg) => msg && msg.length > 0)) return; //if nay error found stop here, Is there ANY error message with length greater than 0? , .some ideal here because one error to reject submission no need to check whole array manualyy . .some() is a built-in JavaScript array method. , Does at least one item in this array pass the test? and here if error msg then it pass test
 
     setLoading(true);
     try {
@@ -211,6 +213,7 @@ export default function RegisterForm({ onSuccess, onSwitch, onClose }) {
             </label>
             <select
               value={values.role}
+              //... value Copy the old data, and update role only , bcz we are updating only one field role so remaiang data amust not get lost hence ..value to store old data and update with target value without unchnage
               onChange={(e) => setValues({ ...values, role: e.target.value })}
               className="w-full px-3 py-2.5 rounded-lg border border-purple-300 text-gray-700 text-sm
                  focus:outline-none focus:ring-2 focus:ring-purple-400
@@ -303,3 +306,4 @@ export default function RegisterForm({ onSuccess, onSwitch, onClose }) {
     </>
   );
 }
+// This form uses React’s controlled component pattern. All input values are stored in a central values state object, and all errors are stored in errors. Each input’s onChange handler updates state and triggers real-time validation using validateField. Phone validation leverages libphonenumber-js to enforce country-specific rules. Password strength is dynamically analyzed and shown to the user. On submit, every field is revalidated, and an API request is sent through registerUser. On success, a popup is displayed, and user authentication data is stored in localStorage. The UI is split into reusable input components for cleaner structure and scalability.

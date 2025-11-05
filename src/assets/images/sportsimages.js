@@ -42,7 +42,6 @@ import Swimming3 from "./Swimming3.webp";
 import Swimming4 from "./Swimming4.webp";
 import Swimming5 from "./Swimming5.webp";        
 
-
 import Baseball1 from "./Baseball1.webp";
 import Baseball2 from "./Baseball2.webp";
 import Baseball3 from "./Baseball3.webp";
@@ -68,4 +67,3 @@ export const sportImages = {
   swimming: [Swimming1, Swimming2, Swimming3, Swimming4, Swimming5],
   hockey: [Hockey1, Hockey2, Hockey3, Hockey4, Hockey5],
 };
-

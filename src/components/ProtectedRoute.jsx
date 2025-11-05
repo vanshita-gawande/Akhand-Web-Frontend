@@ -1,6 +1,6 @@
 import { Navigate } from "react-router-dom";
 
-const ProtectedRoute = ({ children, role }) => {
+  const ProtectedRoute = ({ children, role }) => {
   const token = localStorage.getItem("token");
   const user = JSON.parse(localStorage.getItem("user") || "{}");
   const loginTime = localStorage.getItem("loginTime");

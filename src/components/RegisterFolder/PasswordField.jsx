@@ -1,11 +1,12 @@
 // PasswordFields.jsx
 
 export default function PasswordFields({
-  values,
-  errors,
-  handleChange,
-  passwordSuggestions,
-  showPasswordSuggestions,
+  // receives many props from its parents
+  values, // current snapshot of form fields.
+  errors, // field-wise errors validation
+  handleChange, //updates input values
+  passwordSuggestions,// which pass rule failed
+  showPasswordSuggestions,// boolean to show/hide suggestions
   setShowPasswordSuggestions,
   showPassword,
   setShowPassword,
@@ -18,19 +19,20 @@ export default function PasswordFields({
         <label className="block text-gray-700 font-medium mb-1">Password</label>
         <div className="relative">
           <input
-            type={showPassword ? "text" : "password"}
-            placeholder="••••••••"
+            type={showPassword ? "text" : "password"} // if click  showpass button then shows plain text else masked pass input
+            placeholder="••••••••" // suggests pass lengthnvirtually
             className={`w-full px-4 py-2.5 rounded-lg border ${
               errors.password ? "border-red-500" : "border-gray-300"
             } focus:outline-none focus:ring-2 focus:ring-purple-300 transition`}
-            value={values.password}
-            onChange={(e) => handleChange("password", e.target.value)}
+            value={values.password} // controlled componenet values came from react state
+            onChange={(e) => handleChange("password", e.target.value)}//update pass
             onFocus={() => setShowPasswordSuggestions(true)}
             onBlur={() => setShowPasswordSuggestions(false)}
           />
           <button
             type="button"
             className="absolute right-3 top-1/2 transform -translate-y-1/2 text-sm text-gray-600"
+            // p is just a parameter name (short for “previous” or “prev”).It represents the previous state value.
             onClick={() => setShowPassword((p) => !p)}
           >
             {showPassword ? "Hide" : "Show"}
@@ -88,3 +90,16 @@ export default function PasswordFields({
     </>
   );
 }
+//  everytime when value update follow this 
+// When typing:
+
+// onChange fires
+// handleChange runs
+// values object gets updated
+// component re-renders
+// input displays new value
+// validateField checks rules
+// errors state updates
+// UI shows error message/red borders
+// This is the controlled form pattern.
+// The PasswordFields component is a reusable controlled form component that renders password and confirm password inputs. It receives form values, error messages, and visibility toggles from its parent. It provides real-time validation feedback, password strength suggestions, and user-friendly show/hide toggles. The component conditionally renders suggestions and error messages based on state, and styling changes dynamically using Tailwind to visually indicate errors. All state updates occur through controlled props, keeping business logic centralized and UI stateless.
