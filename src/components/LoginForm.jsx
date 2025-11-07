@@ -1,19 +1,20 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { loginUser } from "../api";
+import { loginUser } from "../api";//API function that sends login request to backend.
 
-export default function LoginForm({ onSuccess, onSwitch, onClose }) {
-  const [loading, setLoading] = useState(false);
+export default function LoginForm({ onSuccess, onSwitch, onClose }) { // onsucess:callabck to run when login succesds what to do further , onswitch to switch for register form , to close model
+  const [loading, setLoading] = useState(false);// represent is the login req currently being processed and initally false bcz user had nt clicked sign in yet becomes true when user clicks sign in , it will set to true when req is in progress
   const [values, setValues] = useState({
     email: "",
     password: "",
     role: "user",
   });
-  const [errors, setErrors] = useState({});
+  const [errors, setErrors] = useState({});// holds the errors from email,pass,form field
   const [showPopup, setShowPopup] = useState(false);
-  const [redirectRole, setRedirectRole] = useState(null);
-  const navigate = useNavigate();
+  const [redirectRole, setRedirectRole] = useState(null);// used to redirect base on role(admin/user/superadmin)
+  const navigate = useNavigate();// to redirect using userdom
 
+  // check validation for emails and password
   function validate() {
     const e = {};
     if (!values.email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/))
@@ -23,6 +24,7 @@ export default function LoginForm({ onSuccess, onSwitch, onClose }) {
     return Object.keys(e).length === 0;
   }
 
+  //stops and wait till validation executes i.e stop page refresh and runs validation
   async function onSubmit(e) {
     e.preventDefault();
     if (!validate()) return;
@@ -31,6 +33,8 @@ export default function LoginForm({ onSuccess, onSwitch, onClose }) {
 
     try {
       const data = await loginUser({
+        // takls to backend after submit form loginUser() sends the login info to your server. and server checks does mail exists in db , is pass correct , does role match,etc
+        // try to login via api
         email: values.email,
         password: values.password,
         role: values.role,
@@ -38,28 +42,28 @@ export default function LoginForm({ onSuccess, onSwitch, onClose }) {
 
       console.log("✅ Login response:", data);
 
-      // Save token and user info
+      //  if user success at login Save token and user info to local storage so user stays even after refresh
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user || {}));
       localStorage.setItem("username", data.user?.firstName || "User");
       localStorage.setItem("email", data.user?.email || "");
       localStorage.setItem("loginTime", Date.now().toString());
 
-      // Save role to redirect after popup
+      // Save role to redirect after popup so redirect to page on basis of role
       setRedirectRole(data.user.role);
 
       // Show success popup
       setShowPopup(true);
-    } catch (err) {
+    } catch (err) { // catch api errors and display backend messages
       setErrors((prev) => ({
         ...prev,
         form: err.response?.data?.message || "Login failed",
       }));
     } finally {
-      setLoading(false);
+      setLoading(false);// stop loader
     }
   }
-
+//continue after popup and redirect to the page as role selected by user
   const handleContinue = () => {
     setShowPopup(false);
     onSuccess?.();
@@ -156,6 +160,7 @@ export default function LoginForm({ onSuccess, onSwitch, onClose }) {
               disabled={loading}
               className="w-40 py-2.5 bg-purple-600 text-white font-semibold rounded-lg hover:bg-purple-700 transition disabled:opacity-50"
             >
+              {/* use here loading and set loading use state */}
               {loading ? "Signing in..." : "Sign In"}
             </button>
           </div>
@@ -194,3 +199,4 @@ export default function LoginForm({ onSuccess, onSwitch, onClose }) {
     </>
   );
 }
+// LoginForm is a controlled component that manages email, password, and role fields using React state. On submit, it validates input, sends a login request via an API function, stores authentication data in localStorage, and displays a success modal. Based on user roles, it navigates to different dashboards. It provides UX feedback such as inline error messages and loading indicators.
