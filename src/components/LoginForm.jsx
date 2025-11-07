@@ -199,4 +199,4 @@ export default function LoginForm({ onSuccess, onSwitch, onClose }) { // onsuces
     </>
   );
 }
-// LoginForm is a controlled component that manages email, password, and role fields using React state. On submit, it validates input, sends a login request via an API function, stores authentication data in localStorage, and displays a success modal. Based on user roles, it navigates to different dashboards. It provides UX feedback such as inline error messages and loading indicators.
+// LoginForm.jsx is a controlled component that manages email, password, and role fields using React state. On submit, it validates input, sends a login request via an API function, stores authentication data in localStorage, and displays a success modal. Based on user roles, it navigates to different dashboards. It provides UX feedback such as inline error messages and loading indicators.
