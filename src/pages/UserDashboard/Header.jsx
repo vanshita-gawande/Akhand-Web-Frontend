@@ -5,18 +5,24 @@ export default function Header({
   logo,
   profilePicture,
   username,
-  setSidebarOpen,
-  venues, // 👈 using venues now
+  setSidebarOpen, // Function to open the sidebar when the user clicks profile
+  venues, // Array of venue objects (used for the search dropdown)
 }) {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [filteredVenues, setFilteredVenues] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");// for what user type in search bar
+  const [filteredVenues, setFilteredVenues] = useState([]); // array of venues that match our current search text
 
+// What it does: Gets the input value from the search bar.
+// Updates searchTerm so React re-renders with current input.
+// If input is empty → clears the dropdown list.
+// Else → filters the venues array by checking if:
+// sport OR name OR location includes the typed text (case-insensitive).
+// Stores the matches in filteredVenues.
   const handleSearch = (e) => {
     const value = e.target.value;
     setSearchTerm(value);
 
     if (value.trim() === "") {
-      setFilteredCards([]);
+      setFilteredCards([]);  // setFilteredVenues
       return;
     }
 
@@ -29,29 +35,29 @@ export default function Header({
     );
     setFilteredVenues(results);
   };
+// logs / store venue info finds matching venue card in the dom and smoothly scrolls to it on that page
+  const handleSelectVenue = (venue) => {
+    console.log("Selected venue:", venue);
 
-   const handleSelectVenue = (venue) => {
-     console.log("Selected venue:", venue);
+    // Optional: scroll to that venue card
+    const cardElement = document.getElementById(venue._id);
+    if (cardElement) {
+      cardElement.scrollIntoView({ behavior: "smooth", block: "center" });
+      cardElement.classList.add("ring-2", "ring-indigo-500");
+      setTimeout(() => {
+        cardElement.classList.remove("ring-2", "ring-indigo-500");
+      }, 2000);
+    }
 
-     // Optional: scroll to that venue card
-     const cardElement = document.getElementById(venue._id);
-     if (cardElement) {
-       cardElement.scrollIntoView({ behavior: "smooth", block: "center" });
-       cardElement.classList.add("ring-2", "ring-indigo-500");
-       setTimeout(() => {
-         cardElement.classList.remove("ring-2", "ring-indigo-500");
-       }, 2000);
-     }
-
-     setSearchTerm("");
-     setFilteredVenues([]);
-   };
+    setSearchTerm("");
+    setFilteredVenues([]);
+  };
 
   return (
     <header className="sticky top-0 z-40 shadow-md bg-gradient-to-r from-purple-100 via-pink-50 to-white">
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center h-20">
         <img src={logo} alt="Logo" className="h-30 w-30" />
-
+  {/* serach bar ui */}
         <div className="relative hidden md:flex items-center bg-purple-200 rounded-lg px-2 py-1 w-72">
           <FaSearch className="text-purple-700 mr-2" />
           <input
@@ -61,6 +67,7 @@ export default function Header({
             value={searchTerm}
             onChange={handleSearch}
           />
+          {/* dipaly fileterd venue below the serach bar */}
           {filteredVenues.length > 0 && (
             <ul className="absolute top-full left-0 right-0 bg-white border border-purple-300 rounded-lg mt-1 max-h-48 overflow-y-auto z-50 shadow-lg">
               {filteredVenues.map((venue) => (
@@ -74,7 +81,8 @@ export default function Header({
               ))}
             </ul>
           )}
-        </div>
+        </div> 
+        {/* nofication, enevelope icon  */}
 
         <div className="flex items-center gap-6">
           <button className="relative text-gray-700 hover:text-purple-700">

@@ -3,17 +3,18 @@ import { useState } from "react";
 import { FaTimes, FaHistory, FaSearch } from "react-icons/fa";
 
 export default function BookingHistoryModal({
-  bookings = [],
-  setShowBookingHistory,
-  setBookingToCancel,
-  setShowCancelPopup,
+  bookings = [], // Array of all bookings belonging to the logged-in user
+  setShowBookingHistory, // function to close model
+  setBookingToCancel, // stores cancel booking
+  setShowCancelPopup,// to confirm cancel
 }) {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [showAllBookings, setShowAllBookings] = useState(false);
-  const [statusFilter, setStatusFilter] = useState("all");
+  const [searchTerm, setSearchTerm] = useState(""); // What the user types in the search bar
+  const [showAllBookings, setShowAllBookings] = useState(false); //Toggle to show only first 3 bookings or all
+  const [statusFilter, setStatusFilter] = useState("all"); // Dropdown filter
   // "all", "assigned", "unassigned"
 
   const getFirst = (...vals) => {
+    //Returns the first non-empty value.
     for (const v of vals)
       if (v !== undefined && v !== null && v !== "") return v;
     return "";
@@ -25,7 +26,7 @@ export default function BookingHistoryModal({
     if (isNaN(date.getTime())) return String(d);
     return date.toLocaleDateString("en-GB");
   };
-
+//If total price already exists, use it.Otherwise, multiply price per slot × number of slots/time values.
   const computeTotalPrice = (booking) => {
     if (booking?.totalPrice != null) return booking.totalPrice;
     const pricePerSlot =
@@ -41,7 +42,7 @@ export default function BookingHistoryModal({
   const q = searchTerm.trim().toLowerCase();
 
   const filteredBookings = bookings.filter((booking) => {
-    // Apply search term filter
+    // Apply search term filter , check if nay of its fields matched what user types and return only filtered list
     const venueName = getFirst(booking.venueId?.name, booking.name).toString();
     const sport = getFirst(booking.venueId?.sport, booking.sport).toString();
     const location = getFirst(
@@ -51,7 +52,7 @@ export default function BookingHistoryModal({
     const dateStr = formatDate(booking.date).toString();
     const status = (booking.status || "").toString().toLowerCase();
     const totalStr = String(computeTotalPrice(booking));
-
+    // Check if search term matches any field
     const matchesSearch =
       !q ||
       venueName.toLowerCase().includes(q) ||
@@ -61,7 +62,7 @@ export default function BookingHistoryModal({
       status.includes(q) ||
       totalStr.includes(q);
 
-    // Apply status filter
+    // Check status filter
     const matchesStatus =
       statusFilter === "all" || status === statusFilter.toLowerCase();
 
@@ -235,3 +236,4 @@ export default function BookingHistoryModal({
     </div>
   );
 }
+// This component shows the user’s booking history in a beautiful popup with live search, filtering, and cancellation options. It dynamically lists all bookings using .map(), allows searching by name, sport, date, or price, and supports viewing details like time, QR code, and status — all while syncing cancel and close actions with its parent component.

@@ -1,25 +1,26 @@
 import axios from "axios";
-
+// It’s a single place to handle all API communication between React and your backend.
 // ✅ Base axios instance
 const API = axios.create({
+  // Axios is a JavaScript library used to make HTTP requests —that means sending or receiving data from a backend server (like your Express API).it is promised based means resolves when request is completes
   baseURL: "http://localhost:5002/api",
   headers: {
     "Content-Type": "application/json",
   },
 });
 
-// ✅ Attach token automatically to all requests
+// ✅ Attach token automatically to all requests intercreptors in axios runs before every request ,it is middleman it check eberyrequest modidifies it if needed and also catch everyresponse from backend
 API.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
   if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+    config.headers.Authorization = `Bearer ${token}`; //tells backend who user is,if no token req is still send for public endpoints
   }
   return config;
 });
 
 // ------------------ AUTH APIs ------------------
 
-// Get current user (explicit token support)
+// Get current user (explicit token support)Fetches logged-in user info (based on token).backend decodes the token and returns { user: {...} }.
 export const getMe = async (token) => {
   const res = await API.get("/auth/me", {
     headers: token ? { Authorization: `Bearer ${token}` } : undefined, // fallback if no token
@@ -27,13 +28,13 @@ export const getMe = async (token) => {
   return res.data; // returns { user: {...} }
 };
 
-// Register API
+// Register API Sends signup form data → backend creates user → returns success message.
 export const registerUser = async (userData) => {
   const response = await API.post("/auth/register", userData);
   return response.data;
 };
 
-// Login API
+// Login API - send credentilas -> get token -> saved it to local storage then calls getme to fetch user info and returns both token and user object
 export const loginUser = async ({ email, password, role }) => {
   const response = await API.post("/auth/login", { email, password, role });
   const token = response.data.token;
@@ -75,7 +76,7 @@ export const bookVenue = async (bookingData) => {
   });
   return response.data;
 };
-
+// fetch all bookings done by user
 export const getUserBookings = async () => {
   const res = await API.get("/bookings/my-bookings");
   return res.data;
@@ -146,7 +147,7 @@ export const deleteUser = async (id) => {
   return data;
 };
 
-//----------------------EMAIL--------------
+//----------------------EMAIL send mail for users--------------
 export const sendEmail = async (emailData) => {
   const response = await API.post("/email/send", emailData);
   return response.data;

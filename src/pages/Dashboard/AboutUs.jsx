@@ -1,5 +1,4 @@
 // src/pages/Dashboard/AboutUs.jsx
-
 import { FaTrophy, FaGlobe, FaHandshake } from "react-icons/fa";
 
 export default function AboutUs({ companyName = "Akhand Sports" }) {

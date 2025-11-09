@@ -27,14 +27,21 @@ import BookingPage from "./BookingPage"
 
 
 export default function UserDashboard() {
+  // Controls UI modals, venue data, and form data.
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [venues, setVenues] = useState([]);
   const [selectedVenue, setSelectedVenue] = useState(null);
-  const [bookingForm, setBookingForm] = useState({ date: "", time: "", players: 1 });
+  const [bookingForm, setBookingForm] = useState({
+    date: "",
+    time: "",
+    players: 1,
+  });
+  // Gets filled from localStorage when the user logs in.
   const [username, setUsername] = useState("Guest");
   const [email, setEmail] = useState("user@example.com");
   const [profilePicture, setProfilePicture] = useState(null);
+  // These handle which popup/modal is currently open and track data for booking and cancellation
   const [showMenu, setShowMenu] = useState(false);
   const [showLogoutPopup, setShowLogoutPopup] = useState(false);
   const [showBookingPopup, setShowBookingPopup] = useState(false);
@@ -44,10 +51,10 @@ export default function UserDashboard() {
   const [bookingToCancel, setBookingToCancel] = useState(null);
   const [showCancelPopup, setShowCancelPopup] = useState(false);
   const [userId, setUserId] = useState(null);
-
+  // Used by the “Scroll to Games” button to smoothly scroll to the games section.
   const gamesRef = useRef(null);
 
-  // ✅ Initialize user from localStorage
+  // ✅ Initialize user from localStorage Load User Data(which was set during login) + Venues(call fetchvenue to load venues)
   useEffect(() => {
     const userData = JSON.parse(localStorage.getItem("user") || "{}");
     if (userData._id) setUserId(userData._id);
@@ -83,7 +90,8 @@ export default function UserDashboard() {
   };
 
   // ✅ Scroll to games section
-  const scrollToGames = () => gamesRef.current?.scrollIntoView({ behavior: "smooth" });
+  const scrollToGames = () =>
+    gamesRef.current?.scrollIntoView({ behavior: "smooth" });
 
   // ✅ Open booking form
   const openBookingForm = (venue) => {
@@ -96,7 +104,7 @@ export default function UserDashboard() {
   const handleBookingChange = (e) =>
     setBookingForm({ ...bookingForm, [e.target.name]: e.target.value });
 
-  // ✅ Submit booking
+  // ✅ Submit booking Sends booking details to backend using bookVenue()On success → shows success popup.On failure → shows error popup
   const handleBookingSubmit = async (e) => {
     e.preventDefault();
     if (!selectedVenue) return;
@@ -123,7 +131,7 @@ export default function UserDashboard() {
     }
   };
 
-  // ✅ Fetch booking history
+  // ✅ Fetch and all  booking made by current user i.e its history
   const fetchUserBookings = async () => {
     try {
       setBookings(await getUserBookings());
@@ -133,12 +141,12 @@ export default function UserDashboard() {
     }
   };
 
-  // ✅ Cancel booking
+  // ✅ Cancel booking - deletes booking from backend and update ui immediately
   const handleCancelBooking = async () => {
     if (!bookingToCancel) return;
     try {
-      await cancelBooking(bookingToCancel._id);
-      setBookings((prev) => prev.filter((b) => b._id !== bookingToCancel._id));
+      await cancelBooking(bookingToCancel._id);//when click cancel curr booking obj is stored in parent state and popup is shown
+      setBookings((prev) => prev.filter((b) => b._id !== bookingToCancel._id));//filter loops and remove locally by keeping only those whose id does not match the one being canacelled
       setShowCancelPopup(false);
       setBookingToCancel(null);
     } catch (err) {
@@ -150,10 +158,13 @@ export default function UserDashboard() {
   // ✅ Sport icon mapper
   const sportIcon = (sport = "") => {
     const s = sport.toLowerCase();
-    if (s.includes("football") || s.includes("soccer")) return <FaFutbol className="text-xl" />;
+    if (s.includes("football") || s.includes("soccer"))
+      return <FaFutbol className="text-xl" />;
     if (s.includes("basket")) return <FaBasketballBall className="text-xl" />;
-    if (s.includes("tennis") && !s.includes("table")) return <GiTennisRacket className="text-xl" />;
-    if (s.includes("table tennis") || s.includes("ping")) return <FaTableTennis className="text-xl" />;
+    if (s.includes("tennis") && !s.includes("table"))
+      return <GiTennisRacket className="text-xl" />;
+    if (s.includes("table tennis") || s.includes("ping"))
+      return <FaTableTennis className="text-xl" />;
     if (s.includes("badminton")) return <GiTennisRacket className="text-xl" />;
     if (s.includes("cricket")) return <GiCricketBat className="text-xl" />;
     if (s.includes("hockey")) return <GiHockey className="text-xl" />;
@@ -256,3 +267,4 @@ export default function UserDashboard() {
     </div>
   );
 }
+// This component shows the user’s booking history in a beautiful popup with live search, filtering, and cancellation options. It dynamically lists all bookings using .map(), allows searching by name, sport, date, or price, and supports viewing details like time, QR code, and status — all while syncing cancel and close actions with its parent component.

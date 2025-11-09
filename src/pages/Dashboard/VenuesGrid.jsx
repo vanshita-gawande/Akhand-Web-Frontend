@@ -1,5 +1,5 @@
 // src/pages/UserDashboard/VenuesGrid.jsx
-import { Trophy, MapPin, Users, Bookmark ,Star } from "lucide-react";
+import {  MapPin, Users, Bookmark  } from "lucide-react";
 import { useState } from "react";
 
 export default function VenuesGrid({

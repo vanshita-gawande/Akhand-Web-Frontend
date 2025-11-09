@@ -4,20 +4,20 @@ import { FaCalendarAlt, FaChevronDown } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 
 export default function BookingModal({
-  selectedVenue,
-  bookingForm,
-  handleBookingChange,
-  username,
-  sportName,
+  selectedVenue, // The venue the user clicked to book (contains name, price, openingTime, etc.)
+  bookingForm, // Object storing form fields: { date, time, players }
+  handleBookingChange, // Function to update bookingForm state
+  username, // Logged-in user’s name
+  sportName, // Name of the sport for the venue
   setModalOpen,
-  setSelectedVenue,
-  userId,
-  onBookingSuccess,
+  setSelectedVenue, // Resets selected venue after booking
+  userId, ///Current logged-in user’s ID
+  onBookingSuccess, // below two aew callbacks function after payment
   onBookingError,
 }) {
-  const [showTimeDropdown, setShowTimeDropdown] = useState(false);
-  const [bookedSlots, setBookedSlots] = useState([]);
-  const [isReviewStep, setIsReviewStep] = useState(false); // ✅ NEW
+  const [showTimeDropdown, setShowTimeDropdown] = useState(false); // for time dropdown
+  const [bookedSlots, setBookedSlots] = useState([]); // stored already-booked slots
+  const [isReviewStep, setIsReviewStep] = useState(false); // ✅ NEW for review before form submit
   const navigate = useNavigate();
 
   // Razorpay script load
@@ -34,7 +34,7 @@ export default function BookingModal({
   const currentSlots = Array.isArray(bookingForm.time) ? bookingForm.time : [];
   const totalPrice = (selectedVenue.price || 0) * currentSlots.length;
 
-  // Fetch booked slots
+  // Fetch booked slots and Updates bookedSlots so those slots appear disabled.
   useEffect(() => {
     if (!selectedVenue || !bookingForm.date) return;
     const fetchBookedSlots = async () => {
@@ -50,7 +50,7 @@ export default function BookingModal({
     };
     fetchBookedSlots();
   }, [selectedVenue, bookingForm.date]);
-
+  // adds/removes a time slot when user clicks the checkbox: prevents selcting already booked times also updtaes the parent form accordingly this booking
   const toggleTimeSelection = (slot) => {
     if (bookedSlots.includes(slot)) {
       alert(`${slot} is already booked!`);
@@ -68,6 +68,11 @@ export default function BookingModal({
   };
 
   // ---------------- PAYMENT HANDLER ----------------
+  // Creates a Razorpay order by calling your backend /create-order.
+  // Razorpay popup opens for payment.
+  // On success, handler() sends payment details + booking info to backend for verification.
+  // If verified → booking is stored → success callback triggers.
+
   const handlePayment = async () => {
     try {
       const orderResponse = await fetch(
@@ -136,7 +141,7 @@ export default function BookingModal({
       alert("Could not initiate payment. Please try again.");
     }
   };
-
+  // Dynamically generates hourly slots between openingTime and closingTime. bcz we are passing only closing and opening time in admin model 
   function generateTimeSlots(openingTime, closingTime, interval = 60) {
     const slots = [];
     const [openH, openM] = openingTime.split(":").map(Number);
