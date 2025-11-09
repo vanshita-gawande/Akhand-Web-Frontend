@@ -1,10 +1,11 @@
 import { FaPlus, FaClipboardList, FaSignOutAlt } from "react-icons/fa";
 
 export default function Header({
+  // these are passed from parent from admindashboard,so header does define what the do it just triggers them when user clicks
   logo,
-  onAddVenue,
-  onBookingHistory,
-  onLogout,
+  onAddVenue,//function open add venue model
+  onBookingHistory,//function open history popup
+  onLogout,// logs admin out
 }) {
   return (
     <header className="sticky top-0 z-40 shadow-md bg-gradient-to-r from-purple-100 via-pink-50 to-white w-full">

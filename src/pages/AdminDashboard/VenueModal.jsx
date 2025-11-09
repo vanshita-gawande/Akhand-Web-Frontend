@@ -1,14 +1,14 @@
 // src/pages/AdminDashboard/VenueModal.jsx
-import { eachHourOfInterval, format } from "date-fns";
-import { Listbox } from "@headlessui/react";
-import { useState, useEffect } from "react";
+import { eachHourOfInterval, format } from "date-fns";// used to generate date
+import { Listbox } from "@headlessui/react";// for proper dropdown 
+import { useState, useEffect } from "react";// React hooks for managing state and syncing data between parent and child.
 
 export default function VenueModal({
-  formData,
-  onChange,
-  onSubmit,
-  editingVenue,
-  onClose,
+  formData, // Contains all the current form values (name, sport, capacity, etc.)
+  onChange, // Handles when input fields change (to update parent state)
+  onSubmit, // Handles form submission (to add or update venue)
+  editingVenue, // Boolean → true if editing an existing venue
+  onClose, // Function to close the modal
 }) {
   // Generate 24-hour slots (midnight → 11 PM)
   const hours = eachHourOfInterval({
@@ -31,7 +31,7 @@ export default function VenueModal({
     setPrice(formData.price || "");
   }, [formData]);
 
-  // Sync changes back to parent
+  // Sync changes back to parent, does two things calls parents onchnage so parent state update too and update local state for immediate ui fedback
   const handleChange = (name, value) => {
     onChange({ target: { name, value } });
     if (name === "openingTime") setOpening(value);
@@ -56,6 +56,7 @@ export default function VenueModal({
         </h2>
 
         {/* Form */}
+        {/* All form fields are controlled by formData (from parent).each input raed value from formdata and update */}
         <form onSubmit={onSubmit} className="space-y-4">
           {/* Sport */}
           <input
@@ -112,7 +113,7 @@ export default function VenueModal({
             required
           />
 
-          {/* Opening & Closing */}
+          {/* Opening & Closing time hanleing using headless ui libraray for */}
           <div className="grid grid-cols-2 gap-4">
             {/* Opening */}
             <div>

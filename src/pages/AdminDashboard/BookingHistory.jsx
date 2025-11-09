@@ -2,10 +2,12 @@ import { useState } from "react";
 import { FaSearch } from "react-icons/fa";
 
 export default function BookingHistory({ bookings, onClose }) {
-  const [expandedUsers, setExpandedUsers] = useState({});
-  const [currentPage, setCurrentPage] = useState(1);
-  const [searchTerm, setSearchTerm] = useState("");
+  //list of bokings from backend and function call to close the booking model
+  const [expandedUsers, setExpandedUsers] = useState({}); // Keeps track of which user rows are expanded (show all bookings).
+  const [currentPage, setCurrentPage] = useState(1); // Tracks which page of results you’re viewing (for pagination).
+  const [searchTerm, setSearchTerm] = useState(""); // Stores the current text entered in the search bar.
 
+  // expand for inidivual user and shows its booking , uses prev to preserve other users maybe expand one at a time
   const toggleExpand = (userId) => {
     setExpandedUsers((prev) => ({
       ...prev,
@@ -13,7 +15,12 @@ export default function BookingHistory({ bookings, onClose }) {
     }));
   };
 
-  // Group bookings by user
+  // Group bookings by user -- it groups all bookings of individual user by name or emaiil and return them in single div - followed for all users and return their individual bookings - it returns object like this
+//   {
+//   "John Doe": { user: {...}, bookings: [booking1, booking2] },
+//   "Alice Smith": { user: {...}, bookings: [booking3] }
+// }
+
   const groupedBookings = Object.entries(
     bookings.reduce((acc, booking) => {
       const displayName =
@@ -28,24 +35,26 @@ export default function BookingHistory({ bookings, onClose }) {
     }, {})
   );
 
-  // 🔍 Filtered results based on search
+  // 🔍 Filtered results based on search This lets you type in the search bar and instantly filter results by:username,email,venue name
   const filteredBookings = groupedBookings.filter(([userId, data]) => {
+    // Prepare searchable text for each user , converting to lowercase so searh isnt case sensitive
     const username = data.user?.firstName
       ? `${data.user.firstName} ${data.user.lastName || ""}`.toLowerCase()
-      : "";
+      : ""; // if user doesnt have email search for email 
     const email = data.user?.email?.toLowerCase() || "";
+    // it loops through all user's booking takes each booking venue name , converts to lowercase and join them all and search in one string
     const venues = data.bookings
       .map((b) => b.venueId?.name?.toLowerCase() || "")
       .join(" ");
-
-    return (
+// actual search this line check idf search text is inside the username,email,venue name
+    return ( 
       username.includes(searchTerm.toLowerCase()) ||
       email.includes(searchTerm.toLowerCase()) ||
       venues.includes(searchTerm.toLowerCase())
     );
   });
 
-  // Pagination for users
+  // Pagination for users, as we had set 4 users per page
   const usersPerPage = 4;
   const totalPages = Math.ceil(filteredBookings.length / usersPerPage);
   const startIndex = (currentPage - 1) * usersPerPage;
@@ -95,17 +104,18 @@ export default function BookingHistory({ bookings, onClose }) {
             No results found for "{searchTerm}"
           </p>
         ) : (
+          // below is actual data in forms of cards
           <>
-            {/* User Cards */}
+            {/* User Cards  map() is a JavaScript array method that lets us loop through an array and return JSX for each item.in react it is standrad way to craete ui from data,instaed of writing html manually we map the data and generate programmly*/}
             {visibleUsers.map(([userId, data]) => {
-              const isExpanded = expandedUsers[userId];
+              const isExpanded = expandedUsers[userId];//checks if user card is expanded to show all bookings
               const visibleBookings = isExpanded
                 ? data.bookings
-                : data.bookings.slice(0, 2);
+                : data.bookings.slice(0, 2);// only two bookings to show at a ime
 
               return (
                 <div
-                  key={userId}
+                  key={userId} // here styling is applied to each ele rendered
                   className="mb-6 border rounded-xl shadow-md overflow-hidden bg-gray-50"
                 >
                   {/* User Header */}
@@ -241,3 +251,47 @@ export default function BookingHistory({ bookings, onClose }) {
     </div>
   );
 }
+// What map  give us?
+
+// 👉 One user card (div) per user group.
+// Each card contains:
+// Header with user name and total bookings
+// A table showing the user’s bookings
+// Optional “Show More” button
+// The .map() is what generates all those cards dynamically.
+// So if 4 users are in visibleUsers,
+// React renders 4 cards — one for each.
+
+// Step 6: Why .map() is needed here?
+
+// Without .map(), you’d have to manually code:
+
+// <div>User 1 bookings...</div>
+// <div>User 2 bookings...</div>
+// <div>User 3 bookings...</div>
+
+// That’s not scalable — what if there are 100 users?
+
+// Instead, with .map(), React automatically generates each user section based on the data array.
+// Step 3: How React uses .map()
+// In React, we don’t map numbers — we map to JSX (HTML-like).
+// Example:
+// const users = ["John", "Alice", "Bob"];
+// return (
+//   <div>
+//     {users.map(name => (
+//       <p key={name}>Hello {name}</p>
+//     ))}
+//   </div>
+// );
+// Here .map():
+// Loops over users
+// Returns <p>Hello John</p>, <p>Hello Alice</p>, <p>Hello Bob</p>
+// React takes that array of JSX and renders it on screen
+// So you get:
+// Hello John
+// Hello Alice
+// Hello Bob
+// No manual repetition.
+
+// The BookingHistory component displays all bookings grouped by users. It allows the admin to search, paginate, and expand individual user sections for detailed bookings. It uses React state to manage search, pagination, and expansion states. The grouping is efficiently handled via Array.reduce() and Object.entries(). This component demonstrates clean data handling and dynamic UI rendering.

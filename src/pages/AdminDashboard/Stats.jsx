@@ -2,9 +2,9 @@ import { useEffect, useState } from "react";
 import { FaUsers, FaClipboardList } from "react-icons/fa";
 import { getStats } from "../../api"; // adjust path if needed
 
-// Animate numbers from `from` to `to`
+// Animate numbers from `from` to `to` instaed of jumping it counts smoothly
 function animateValue(from, to, setter, duration = 700) {
-  const diff = to - from;
+  const diff = to - from;//setter to update displayed value
   if (diff === 0) {
     setter(to);
     return;
@@ -21,19 +21,24 @@ function animateValue(from, to, setter, duration = 700) {
 }
 
 export default function Stats() {
-  const [stats, setStats] = useState({
+  const [stats, setStats] = useState({ // holds the real value fetched from backend
     totalUsers: 0,
     totalBookings: 0,
     admins: 0,
   });
-  const [display, setDisplay] = useState({
+  const [display, setDisplay] = useState({ // holds the animated display value used for ui
     totalUsers: 0,
     totalBookings: 0,
     admins: 0,
   });
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);// used during api call
+  const [error, setError] = useState(null);//stores api error message
 
+  // fetched the stats data from backend, 
+  // useEffect runs once when the component first mounts (because of [] dependency array).
+  // It calls the backend using getStats().
+  // If successful, it stores the stats and triggers the number animation.
+  // If it fails, it shows an error message.
   useEffect(() => {
     const fetchStats = async () => {
       setLoading(true);

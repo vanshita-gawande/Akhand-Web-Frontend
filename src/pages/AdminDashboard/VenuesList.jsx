@@ -1,3 +1,4 @@
+// VenuesList.jsx is a React component that displays all the venues registered by an admin in a card grid format, with edit and delete buttons for each.
 import {
   Pencil,
   Trash2,
@@ -6,7 +7,7 @@ import {
   Users,
   CalendarDays,
   Clock,
-} from "lucide-react";
+} from "lucide-react";//lib alternative to react-icons
 import { format } from "date-fns";
 
 function formatTime(timeString) {
@@ -28,9 +29,9 @@ export default function VenuesList({ venues, onEdit, onDelete }) {
         </p>
       ) : (
         <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {venues.map((venue) => (
+          {venues.map((venue) => ( // list of venue objects created from backend and using map creating ui card per venue
             <div
-              key={venue._id}
+              key={venue._id}//core mapping of cards
               className="bg-white rounded-2xl shadow-md hover:shadow-xl transition transform hover:-translate-y-1 flex flex-col overflow-hidden"
             >
               {/* Card Header */}
